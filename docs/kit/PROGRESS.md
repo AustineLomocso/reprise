@@ -171,3 +171,27 @@ Deviations and notes:
 - `prompts/`: copy of `03-runtime-prompts/`, unchanged.
 - Tests: every worked example in `statistics.md` to 4 decimals; every verdict branch; config (missing, invalid, defaults); schemas (the examples in `data-contracts.md` validate, unknown enum fails); CLI stubs exit 2.
 - CI `.github/workflows/ci.yml`: Node 24 assert (G-8), `npm ci`, typecheck, test, build, `git diff --exit-code dist/`.
+
+## Step 1 — report
+
+Built:
+- `package.json` with exact versions: `yaml` 2.9.1, `ajv` 8.20.0, `ajv-formats` 3.0.1; dev `typescript` 7.0.2, `esbuild` 0.28.2, `@types/node` 24.13.6. No other dependencies.
+- `tsconfig.json` (strict, `noUncheckedIndexedAccess`, `nodenext`), `esbuild.config.mjs` (dist bundle, and `--dev` for tests and scripts).
+- `src/cli.ts` (entry) and `src/commands.ts` (command table, parser, help, dispatch). Stubs: `triage`, `fix`, `verify`, `run --local`, `publish`, `provider`, each "Not implemented in the web-only build: <command>" on stderr, exit 2. Usage errors exit 1.
+- `src/config/` (loader, defaults equal to the `architecture.md` example), `src/schemas.ts` (Ajv 2020 with formats, strict mode), `schemas/*.schema.json` (8 files), `src/types.ts`.
+- `src/stats/index.ts` (`wilson`, `zeroFailureBound`, `requiredRuns`, formatting, `claimSentence`, `boundSentence`), `src/stats/verdict.ts` (`verdictFromTrials`, `trialSymbol`).
+- `src/provider/index.ts`: interface and stage table only, marked NOT IMPLEMENTED.
+- `prompts/`: byte-identical copy of `03-runtime-prompts/` (`diff -r` clean).
+- `.github/workflows/ci.yml`: checkout v7, setup-node v7, G-8 assert, `npm ci`, typecheck, test, build, `git diff --exit-code -- dist/`.
+
+Commands and results:
+- `npx tsc --noEmit -p .`: no errors.
+- `npm test`: 47 tests, 47 pass (stats worked examples to 4 decimals including the 4/20 power check; every verdict branch and the invalid-trial edge at exactly 10%; config missing, invalid, unknown key, bad YAML, defaults; schemas: the `data-contracts.md` examples parsed from the spec itself, unknown enum, unknown field, null values, array cap, stage outputs from `triage-pipeline.md`; CLI stubs, help, flag errors).
+- Two local builds give the same `dist/reprise.mjs` SHA-256; CI's fresh Linux build matches the committed Windows build.
+- CI run 36092737464: success. G-8 PASS (`v24.21.0`).
+
+Deviations and decisions:
+- The schemas carry three nullable points beyond the approved list, each following the same "stage did not run" rule: `triage.fingerprint` (an `ERROR` during intake), `verification.repro.evidence` (only meaningful when every run passed), and `duplicate.behaviour_check`, whose type the spec never gave: it is `null` or a `TrialOutcome` (the result of running the candidate's repro test once). Tell me if you want any of these changed.
+- `rootcause.confidence` is a free string: the spec shows only the value `"high"` and defines no enumeration.
+- The site-index example uses `""` placeholders for `state`, `verdict` and `updated_at`; the schema test fills them in rather than weakening the schema.
+- `sandbox.dockerfile` and `version` are the only required config keys; `architecture.md` marks the Dockerfile "required" and gives defaults for everything else.
