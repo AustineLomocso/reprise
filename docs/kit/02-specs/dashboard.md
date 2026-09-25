@@ -111,6 +111,7 @@ The overview opens with the most recent before/after pair of strips rather than 
 - **Fix source.** `FixSource` `bob` is shown as "Proposed by Reprise" and `human` as "Written by a person" (the wireframe says "Bob or person"; under ADR-12 the provider may not be Bob).
 - **Colour of states.** Filled reproduced colour: `CONFIRMED`, `FIX_INCOMPLETE`, `REGRESSION_DETECTED`. Filled intermittent colour: `FLAKY`. Outlined clean colour: `FIX_VERIFIED` only. Every other state, including `RESOLVED` (which may be "merged without passing verification"), is an outlined ink square. The words always sit next to the mark.
 - **Latest pair.** The overview's before/after pair is the most recently updated record that has a triage sequence and a verification with at least one run.
+- **Design pass (owner request).** Run numbers under large strips in run order (1, 10, 20 …); a "One cell per run" key under the latest pair; claim sentences in a boxed note (clean edge, intermittent edge when evidence is limited); the sample banner edge uses the invalid-run hatch; a three-cell brand mark; whole-row links in the report table; one label width for fact lists; the timeline as a vertical rule with square markers. Details in `../05-quality/ui-review.md` Review 2.
 - **Intermittent colour as text.** Light-scheme intermittent `#9A6A00` on Mist is 4.32:1, below AA for body text, so it is used only for graphics (strip cells, marks, the diagram), where the non-text minimum is 3:1.
 
 ## Motion (team rules, apply to every UI element)

@@ -57,3 +57,22 @@ Reviewed with Playwright (Chromium) on `npm run preview` (17 sample records, `da
 - Accessibility: contrast AA in both schemes, focus visible, strip has aria summary and hidden list, table semantics, page titles.
 - Security: no `innerHTML`, CSP clean, links only to `https://github.com/`.
 - Responsiveness: 360 px, 768 px, 1440 px.
+
+## Review 2: design pass, 25 Sep 2026
+
+A refinement pass within `02-specs/dashboard.md` (the owner asked for a stronger UI): same palette, Plex 400 and 600, the type scale, left-aligned column, no shadows or gradient washes, same motion rules. The direction is "instrument readout": the trial strip is treated as a measuring device.
+
+| Area | Before | After | Why |
+| --- | --- | --- | --- |
+| Large trial strips | A row of cells with no scale | Run numbers under runs 1, 10, 20 … hang from their own cells (`data-tick` plus `::after`), so the scale wraps with the strip at any width. Only strips in run order are numbered | A reader can say "it failed on runs 1, 4, 9 and 15" at a glance; the strip reads as a measurement, not decoration |
+| Overview before/after | Two rows with the count straight after each strip, so counts sat at different x positions | One grid: labels, strips and counts each own a column; the claim sentence sits under the pair in a boxed note | The pair is the page's one memorable element; aligned counts make before and after directly comparable, and the claim says what the "after" proves |
+| Cell key | None; a first-time visitor had to guess what filled and outlined cells mean | "One cell per run:" key drawn with the real cells (reproduced, passed, invalid run) under the pair | The page's job is to be understood in ten seconds |
+| Claim sentences | Plain paragraph among others | Boxed note with a clean-colour edge; intermittent edge when the evidence is limited | The claim is the statistical result the page exists to justify |
+| Sample banner | Plain box with a thick ink edge | The edge carries the invalid-run hatch | Reuses the dashboard's own sign for "not a real run"; still plain words, still on every route |
+| Brand | Wordmark only | Three trial cells (reproduced, passed, reproduced) before the wordmark, matching the favicon | Identity comes from the trial strip, as the design plan says |
+| Report table | Only the title text was a target | The whole row opens the report (link overlay); keyboard focus outlines the whole row where `:has()` is supported, otherwise the link's own ring stays | Bigger target, same single tab stop per row; verified by clicking the Result cell |
+| Fact lists | Label column width differed per section (12 rem in Reproduction, 8 rem in Diagnosis) | One 12.5 rem label column on every fact list | Values line up down the whole page |
+| Timeline | Rows separated by rules | One vertical ink rule with square markers; a filled reproduced marker for a stop, a clean-outlined marker for resolution | Reads as a lab log; squares echo the trial cells |
+| How it works | Browser list numbers | Large numerals in their own column (CSS counter), `role="list"` kept for Safari | It is a real sequence; the numbers carry it |
+
+Checks after this pass: 79 tests pass; no horizontal scroll at 360 px on the overview, #19 or How it works (dark scheme); 0 CSP violations and 0 console errors over 7 routes; Lighthouse accessibility 100 on `#/`, `#/issues/1`, `#/how-it-works`; clicking a row's Result cell opens that report; nothing new animates (the ruler numbers belong to cells and enter with them).

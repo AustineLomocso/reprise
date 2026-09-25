@@ -156,11 +156,17 @@ function trialStrip(cells, opts) {
   const { variant, ordered = true, animate = false } = opts;
   const symbols = [...cells];
   const summary = stripSummary(cells, ordered);
+  // Run ruler: large strips in run order are numbered under runs 1, 10, 20 … like a scale.
+  // Grouped strips (order not recorded) get no numbers, because the positions mean nothing.
+  const ruled = variant === 'large' && ordered;
   const strip = el('div', {
-    className: `strip strip--${variant}${animate ? ' strip--enter' : ''}`,
+    className: `strip strip--${variant}${ruled ? ' strip--ruled' : ''}${animate ? ' strip--enter' : ''}`,
     attrs: { role: 'img', 'aria-label': summary },
   });
-  const nodes = symbols.map((s) => el('span', { className: `cell cell--${s}` }));
+  const nodes = symbols.map((s, i) => el('span', {
+    className: `cell cell--${s}`,
+    attrs: { 'data-tick': ruled && (i === 0 || (i + 1) % 10 === 0) ? String(i + 1) : undefined },
+  }));
   strip.append(...nodes);
   if (variant === 'mini') return strip;
 
@@ -321,30 +327,50 @@ async function latestPair(index) {
   return withSequence.length ? { entry: withSequence[0], record: null, verification: null } : null;
 }
 
+/** Key to the cell shapes, drawn with the same cells as the strips. */
+function cellKey() {
+  const item = (symbol, label) => el('span', { className: 'key-item' }, [
+    el('span', { className: `cell cell--${symbol}`, attrs: { 'aria-hidden': 'true' } }),
+    text(label),
+  ]);
+  return el('p', { className: 'key' }, [
+    el('span', { className: 'key-lead', text: 'One cell per run:' }),
+    item('F', 'reproduced'),
+    item('P', 'passed'),
+    item('X', 'invalid run'),
+  ]);
+}
+
 function beforeAfter(latest) {
   const { entry, verification } = latest;
   const seq = entry.sequence;
   const k = [...seq].filter((c) => c === 'F').length;
   const valid = [...seq].filter((c) => c !== 'X').length;
-  const rows = [
+  // One grid: labels, strips and counts each share a column, so the two runs line up.
+  const items = [
     el('dt', { text: 'Before' }),
-    el('dd', {}, [trialStrip(seq, { variant: 'large', ordered: true }), el('span', { className: 'count', text: `${k} of ${valid} reproduced` })]),
+    el('dd', { className: 'pair-strip' }, [trialStrip(seq, { variant: 'large', ordered: true })]),
+    el('dd', { className: 'pair-count', text: `${k} of ${valid} reproduced` }),
   ];
   if (verification) {
     const r = verification.repro;
     const cells = groupedCells(r.runs, r.failed, r.invalid);
     const ordered = r.runs === 0 || [r.failed, r.invalid, r.runs - r.failed - r.invalid].includes(r.runs);
-    rows.push(
+    items.push(
       el('dt', { text: 'After' }),
-      el('dd', {}, [trialStrip(cells, { variant: 'large', ordered }), el('span', { className: 'count', text: `${r.failed} of ${r.runs - r.invalid} reproduced` })]),
+      el('dd', { className: 'pair-strip' }, [trialStrip(cells, { variant: 'large', ordered })]),
+      el('dd', { className: 'pair-count', text: `${r.failed} of ${r.runs - r.invalid} reproduced` }),
     );
   }
+  const claim = verification?.repro.claim;
   return el('section', { className: 'latest', attrs: { 'aria-labelledby': 'latest-title' } }, [
     el('h2', { className: 'latest-title', attrs: { id: 'latest-title' } }, [
       el('span', { className: 'label', text: 'Latest: ' }),
       internalLink(`#/issues/${entry.issue}`, `#${entry.issue} ${entry.title}`),
     ]),
-    el('dl', { className: 'pair' }, rows),
+    el('dl', { className: 'pair' }, items),
+    claim ? el('p', { className: `claim claim--${verification.repro.evidence ?? 'none'}` }, [richText(claim)]) : null,
+    cellKey(),
   ]);
 }
 
@@ -373,7 +399,7 @@ async function overviewView() {
     : el('span', { className: 'none', text: '–', attrs: { 'aria-label': 'No trials' } }));
   const rows = index.issues.map((e) => el('tr', {}, [
     el('td', { className: 'col-num', text: `${e.issue}` }),
-    el('td', {}, [internalLink(`#/issues/${e.issue}`, e.title)]),
+    el('td', {}, [el('a', { className: 'row-link', text: e.title, attrs: { href: `#/issues/${e.issue}` } })]),
     el('td', { className: 'col-result' }, [
       resultMarker(e.state, dupOf.get(e.issue)),
       typeof e.sequence === 'string' && e.sequence.length ? el('div', { className: 'narrow-only' }, [trials(e)]) : null,
@@ -581,7 +607,7 @@ function verificationBlock(v, record, headingLevel) {
     r.runs > 0 ? trialStrip(cells, { variant: 'large', ordered }) : null,
     el('p', { className: 'strip-caption', text: `Reproduced in ${r.failed} of ${r.runs - r.invalid} runs of the reproduction test${r.runs_required ? ` (${r.runs_required} required)` : ''}${r.invalid ? `; ${r.invalid} did not run correctly` : ''}.` }),
     !ordered ? el('p', { text: 'Only the counts of these runs are recorded, not their order, so the strip groups failures first.' }) : null,
-    r.claim ? el('p', {}, [richText(r.claim)]) : null,
+    r.claim ? el('p', { className: `claim claim--${r.evidence ?? 'none'}` }, [richText(r.claim)]) : null,
     r.evidence === 'limited' ? el('p', { className: 'note', text: 'Limited evidence: the run count was capped.' }) : null,
     r.injected ? el('p', { text: 'The pull request did not include the reproduction test, so Reprise added it for this check only.' }) : null,
     el('p', { text: `Test suite: ${formatInt(reg.tests_total)} tests compared with the base branch.` }),
@@ -649,7 +675,9 @@ function fixSection(record) {
 function timelineSection(record) {
   if (!record.events.length) return null;
   return section('timeline', 'Timeline', [
-    el('ol', { className: 'timeline' }, record.events.map((e) => el('li', {}, [
+    el('ol', { className: 'timeline' }, record.events.map((e) => el('li', {
+      className: e.type === 'error' ? 'ev-stop' : e.type === 'resolved' ? 'ev-resolved' : undefined,
+    }, [
       el('time', { text: formatDateTime(e.at), attrs: { datetime: e.at } }),
       el('span', {}, [el('span', { className: 'what', text: EVENT_LABEL[e.type] ?? e.type }), e.detail ? text(`: ${e.detail}`) : null]),
     ]))),
@@ -718,7 +746,8 @@ async function howView() {
     title: 'How it works · Reprise',
     nodes: [
       el('h1', { text: 'How it works', attrs: { tabindex: '-1' } }),
-      el('ol', { className: 'steps' }, steps.map(([h, p]) => el('li', {}, [el('h2', { text: h }), el('p', { text: p })]))),
+      // role="list": Safari drops list semantics when list-style is none.
+      el('ol', { className: 'steps', attrs: { role: 'list' } }, steps.map(([h, p]) => el('li', {}, [el('h2', { text: h }), el('p', { text: p })]))),
       el('p', { className: 'note', text: `New issues from visitors wait until a maintainer of ${name} adds the reprise label. Reprise does not run on its own for strangers.` }),
       svg ? el('figure', { className: 'lifecycle-figure' }, [
         el('div', { className: 'lifecycle-scroll' }, [svg]),
