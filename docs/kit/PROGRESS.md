@@ -91,3 +91,16 @@ Steps:
 2. Create `AustineLomocso/reprise-smoke` (public) with `.github/workflows/smoke.yml` (`workflow_dispatch`): jobs for G-8, G-9, G-10 that print PASS or FAIL, and a separate `claude-smoke` job gated on the secret being present.
 3. Web checks G-15, G-17, G-18, G-21; record facts with sources in `verified-facts.md` and results in `verification-gates.md`.
 4. Checkpoint: the owner sets `ANTHROPIC_API_KEY` in `reprise-smoke` and gives G-13 results; then run the Claude smoke job.
+
+## Phase 0 status (in progress, stopped at checkpoint)
+
+Done:
+- Repositories created (public): `AustineLomocso/reprise` (kit pushed), `AustineLomocso/reprise-demo-shop` (empty), `AustineLomocso/reprise-smoke`.
+- G-15 PASS, G-17 PASS, G-21 docs PASS (facts F-19 to F-29 in `verified-facts.md`). Commands: `gh api repos/<action>/releases/latest` for each action; `gh api repos/IBM/plex/license`; `gh api repos/actions/checkout/readme`; `npm view @anthropic-ai/sdk`; official docs pages cited in the facts table.
+- G-18 FAIL: all five actions have newer majors (F-27). Release notes read for each major since the kit's version: nothing affects the inputs the specs use (`node-version`, `fetch-depth`, `persist-credentials`, `ref`, `path`); checkout v7 blocks fork-PR checkout under `pull_request_target`/`workflow_run` (neither is used); upload-pages-artifact v4+ excludes dotfiles (the dashboard has none). Waiting for the owner's go-ahead on the fallback.
+- `reprise-smoke` prepared locally (committed, not pushed): `smoke.yml` with G-8, G-9, G-10 jobs and a `claude` job behind a `run_claude` dispatch input; `claude-smoke/smoke.mjs` uses `@anthropic-ai/sdk` 0.128.0 (pinned, lockfile) with one confined `read_file` tool, prints PASS/FAIL and token usage, never the key. Checked locally: `node --check`, and a run without a key fails cleanly with no stack trace. The workflow uses the newest majors, so it is pushed only after the G-18 go-ahead.
+
+Waiting on the owner:
+1. G-18 go-ahead to use the newest majors.
+2. `ANTHROPIC_API_KEY` secret in `reprise-smoke` (single-workspace key, spend limit set).
+3. G-13 results.
