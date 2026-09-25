@@ -1,0 +1,96 @@
+%% Reprise - issue record (issues/N.json on reprise-data)
+erDiagram
+    ISSUE_RECORD ||--|| TRIAGE : has
+    ISSUE_RECORD ||--o{ FIX_ITERATION : has
+    ISSUE_RECORD ||--o{ EVENT : logs
+    ISSUE_RECORD ||--|| COST : totals
+    TRIAGE ||--|| FINGERPRINT : contains
+    TRIAGE ||--o| REPRO : contains
+    TRIAGE ||--o| BISECT : contains
+    TRIAGE ||--o| ROOT_CAUSE : contains
+    FIX_ITERATION ||--o| VERIFICATION : has
+    VERIFICATION ||--|| REPRO_CHECK : contains
+    VERIFICATION ||--|| REGRESSION : contains
+
+    ISSUE_RECORD {
+        int schema
+        string repo
+        int issue
+        string title
+        string state
+        string created_at
+        string updated_at
+    }
+    TRIAGE {
+        string verdict
+        int duplicate_of
+        string question
+        int attempts
+        int duration_ms
+    }
+    FINGERPRINT {
+        string component
+        string symptom
+        string trigger
+        string expected
+        string actual
+        string error_signature
+    }
+    REPRO {
+        string test_file
+        string test_sha256
+        string signature_kind
+        string signature_pattern
+        int trials
+        int failed
+        int invalid
+        string sequence
+        float rate
+        float wilson_low
+        float wilson_high
+    }
+    BISECT {
+        string status
+        string first_bad_sha
+        string good_sha
+        string reason
+    }
+    ROOT_CAUSE {
+        string summary
+        string locations
+        string fix_direction
+        string ide_prompt
+    }
+    FIX_ITERATION {
+        int n
+        string source
+        int pr
+        string head_sha
+        string base_sha
+    }
+    VERIFICATION {
+        string verdict
+        string finished_at
+    }
+    REPRO_CHECK {
+        int runs_required
+        int runs
+        int failed
+        string claim
+    }
+    REGRESSION {
+        int tests_total
+        string regressions
+        string newly_passing
+        string pre_existing
+        string removed
+    }
+    EVENT {
+        string at
+        string type
+        string detail
+    }
+    COST {
+        float bobcoins_total
+        string by_stage
+    }

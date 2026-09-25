@@ -1,0 +1,62 @@
+%% Reprise - engine modules
+flowchart TB
+    event["GitHub event payload"] --> cli["cli.ts<br/>command router"]
+    cli --> cfg["config<br/>.reprise.yml + defaults"]
+    cli --> gh["github<br/>trust check, comments, labels, branches, PRs"]
+
+    subgraph Triage
+        intake["intake"] --> dedupe["dedupe"]
+        dedupe --> env["environment"]
+        env --> repro["repro"]
+        repro --> trials["trials"]
+        trials --> verdict["verdict"]
+        verdict --> diag["rootcause + bisect"]
+    end
+
+    subgraph Fix
+        propose["propose loop"] --> scope["edit-scope guard"]
+    end
+
+    subgraph Verify
+        rcheck["repro check"] --> regress["regression compare"]
+    end
+
+    cli --> intake
+    cli --> propose
+    cli --> rcheck
+    propose --> rcheck
+
+    bob["provider (ADR-12)<br/>bob: spawn bob run / claude: Messages API + confined tools<br/>parse JSON, stats"]
+    sandbox["sandbox<br/>docker build/run, JUnit parse"]
+    stats["stats<br/>wilson, bounds, required runs"]
+    store["store<br/>issue record on reprise-data"]
+    render["render<br/>comment templates"]
+    sec["security<br/>minimal env, redaction"]
+
+    intake --> bob
+    dedupe --> bob
+    repro --> bob
+    diag --> bob
+    propose --> bob
+
+    dedupe --> sandbox
+    env --> sandbox
+    repro --> sandbox
+    trials --> sandbox
+    diag --> sandbox
+    propose --> sandbox
+    rcheck --> sandbox
+    regress --> sandbox
+
+    trials --> stats
+    rcheck --> stats
+
+    verdict --> store
+    diag --> store
+    propose --> store
+    regress --> store
+
+    store --> render
+    render --> sec
+    sec --> gh
+    bob --> sec

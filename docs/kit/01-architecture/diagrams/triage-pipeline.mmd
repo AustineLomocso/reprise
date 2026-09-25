@@ -1,0 +1,33 @@
+%% Reprise - triage pipeline
+flowchart TD
+    start(["Trigger: issue opened by trusted actor,<br/>reprise label added, /reprise triage,<br/>or reporter reply on NEEDS_INFO"]) --> guard{"Trusted trigger<br/>and auto-retriage cap not reached?"}
+    guard -- no --> stop(["Exit without Bob calls"])
+    guard -- yes --> intake["Intake (Bob, read-only)<br/>fingerprint + missing info list"]
+    intake --> enough{"Enough information<br/>to attempt a test?"}
+    enough -- no --> needsinfo[["NEEDS_INFO<br/>one question"]]
+    enough -- yes --> score["Score fingerprint against<br/>all earlier records"]
+    score --> cand{"Top score >= 0.60?"}
+    cand -- yes --> confirm["Confirm (Bob, read-only)<br/>+ run candidate's repro test if it has one"]
+    confirm --> isdup{"Same bug?"}
+    isdup -- yes --> dup[["DUPLICATE of #M"]]
+    isdup -- no --> envb
+    cand -- no --> envb["Build sandbox image<br/>from Dockerfile.reprise"]
+    envb --> envok{"Config present<br/>and image builds?"}
+    envok -- no --> blocked[["BLOCKED_ENV<br/>names missing piece"]]
+    envok -- yes --> loop["Repro loop (see repro-loop.mmd)<br/>up to 3 attempts"]
+    loop --> accepted{"Test accepted?<br/>fails with matching signature"}
+    accepted -- no --> needsinfo2[["NEEDS_INFO<br/>tried 3 tests, 0 valid failures,<br/>one question"]]
+    accepted -- yes --> trials["Run 20 trials in fresh sandboxes"]
+    trials --> rate{"Valid failures k of 20"}
+    rate -- "k = 20" --> confirmed[["CONFIRMED"]]
+    rate -- "1..19" --> flaky[["FLAKY<br/>k/20 with Wilson 95% interval"]]
+    rate -- "k = 0" --> needsinfo3[["NEEDS_INFO<br/>rate below bound, one question"]]
+    confirmed --> bisect["git bisect with repro test"]
+    bisect --> rc["Root-cause brief (Bob, read-only)"]
+    flaky --> rc
+    rc --> post["Push branch reprise/repro-N,<br/>comment, labels, record, redeploy dashboard"]
+    needsinfo --> post2["Comment, label, record, redeploy"]
+    needsinfo2 --> post2
+    needsinfo3 --> post2
+    dup --> post2
+    blocked --> post2

@@ -1,0 +1,34 @@
+%% Reprise - fix assistance and verification
+sequenceDiagram
+    autonumber
+    actor M as Maintainer
+    participant GH as GitHub
+    participant E as Engine
+    participant B as Bob (agent mode, no execute)
+    participant S as Sandbox
+
+    M->>GH: comment /reprise fix on issue N (CONFIRMED or FLAKY)
+    GH->>E: issue_comment event
+    E->>E: trust check, load record, create branch reprise/fix-N from default branch
+    E->>E: add repro test from record to workspace
+    loop iteration 1..3
+        E->>B: propose-fix prompt (+ previous results on --resume)
+        B-->>E: edits in src/** or test/** + JSON summary
+        E->>E: revert out-of-scope edits, reject if repro test changed
+        E->>S: quick check: repro test x3, full suite x1
+        S-->>E: results
+        alt repro passes and no new failures
+            E->>E: stop loop
+        end
+    end
+    E->>GH: push branch, open draft PR "Fixes #N" with best candidate + repro test
+    E->>S: full verification (repro runs = required n, regression compare vs base)
+    S-->>E: results
+    E->>GH: PR comment + label FIX_VERIFIED / FIX_INCOMPLETE / REGRESSION_DETECTED
+    E->>GH: update issue comment and record, redeploy dashboard
+
+    Note over M,GH: A developer can instead open their own PR with "Fixes #N".
+    M->>GH: push to PR or /reprise verify
+    GH->>E: pull_request event
+    E->>S: same verification (repro test injected from record if absent)
+    E->>GH: PR comment + label

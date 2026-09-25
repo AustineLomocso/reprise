@@ -1,0 +1,22 @@
+%% Reprise - reproduction test loop
+sequenceDiagram
+    autonumber
+    participant E as Engine
+    participant B as Bob (bob run, agent mode, no execute)
+    participant S as Sandbox (docker, no network)
+
+    E->>B: write-repro-test prompt + fingerprint + report (untrusted block)
+    B-->>E: writes test/reprise/issue-N.test.js<br/>returns JSON {test_file, signature, rationale}
+    E->>E: check edit scope (only test/reprise/**), revert anything else
+    loop attempt 1..3
+        E->>S: run single test once
+        S-->>E: JUnit result + output
+        alt fails and output matches signature
+            E->>E: accept test
+        else passes, errors, or failure does not match
+            E->>B: --resume task: revise-repro-test prompt + result details
+            B-->>E: revised test + JSON
+            E->>E: check edit scope again
+        end
+    end
+    E->>E: accepted test goes to 20 trials, otherwise NEEDS_INFO

@@ -1,0 +1,32 @@
+%% Reprise - issue lifecycle state machine
+stateDiagram-v2
+    [*] --> NEW
+    NEW --> TRIAGING: trusted trigger
+    TRIAGING --> CONFIRMED
+    TRIAGING --> FLAKY
+    TRIAGING --> DUPLICATE
+    TRIAGING --> NEEDS_INFO
+    TRIAGING --> BLOCKED_ENV
+    TRIAGING --> ERROR: budget or tool failure
+    NEEDS_INFO --> TRIAGING: reporter reply or /reprise triage
+    BLOCKED_ENV --> TRIAGING: /reprise triage after config fix
+    ERROR --> TRIAGING: /reprise triage
+    CONFIRMED --> FIXING: /reprise fix
+    FLAKY --> FIXING: /reprise fix
+    CONFIRMED --> VERIFYING: human PR with Fixes #N
+    FLAKY --> VERIFYING: human PR with Fixes #N
+    FIXING --> VERIFYING: PR opened
+    FIXING --> FIX_ABANDONED: Bob produced no usable change
+    FIX_ABANDONED --> FIXING: /reprise fix
+    FIX_ABANDONED --> VERIFYING: human PR
+    VERIFYING --> FIX_VERIFIED
+    VERIFYING --> FIX_INCOMPLETE
+    VERIFYING --> REGRESSION_DETECTED
+    FIX_INCOMPLETE --> VERIFYING: new commits or /reprise verify
+    REGRESSION_DETECTED --> VERIFYING: new commits or /reprise verify
+    FIX_INCOMPLETE --> FIXING: /reprise fix
+    REGRESSION_DETECTED --> FIXING: /reprise fix
+    FIX_VERIFIED --> VERIFYING: new commits pushed
+    FIX_VERIFIED --> RESOLVED: PR merged and issue closed
+    DUPLICATE --> [*]
+    RESOLVED --> [*]

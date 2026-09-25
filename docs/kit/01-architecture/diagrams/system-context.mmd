@@ -1,0 +1,26 @@
+%% Reprise - system context
+flowchart LR
+    reporter([Bug reporter])
+    maintainer([Maintainer])
+    developer([Developer])
+    visitor([Visitor or judge])
+
+    subgraph GH["GitHub (public repositories, free tier)"]
+        issues["Issues and pull requests<br/>reprise-demo-shop"]
+        runner["GitHub Actions runner<br/>Reprise engine + Docker<br/>(+ Bob Shell when provider is bob)"]
+        data[("reprise-data branch<br/>issues/N.json")]
+        pages["GitHub Pages<br/>Reprise dashboard"]
+    end
+
+    bobsvc[["Reasoning provider (ADR-12)<br/>IBM Bob service (BOB_API_KEY)<br/>or Claude API (ANTHROPIC_API_KEY)"]]
+
+    reporter -->|files bug report| issues
+    maintainer -->|adds reprise label, /reprise fix, reviews, merges| issues
+    developer -->|opens fix PR with Fixes #N| issues
+    issues -->|workflow events| runner
+    runner <-->|prompts out, JSON results and file edits back| bobsvc
+    runner -->|labels, comments, branches, PRs| issues
+    runner -->|commit issue record| data
+    runner -->|build and deploy site| pages
+    data -->|read at site build| runner
+    visitor -->|browses| pages
