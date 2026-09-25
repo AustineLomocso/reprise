@@ -104,3 +104,56 @@ Waiting on the owner:
 1. G-18 go-ahead to use the newest majors.
 2. `ANTHROPIC_API_KEY` secret in `reprise-smoke` (single-workspace key, spend limit set).
 3. G-13 results.
+
+---
+
+# Web-only slice (started 25 Sep 2026)
+
+The owner narrowed the next build to a web-only first slice: the engine scaffold (phase 1), the dashboard and `reprise build-site` (phase 6), generated sample records, and a zero-cost Pages deployment (Pages parts of phase 7), then the dashboard parts of phase 8. No AI or model API code, no triage, fix or verify pipelines, no sandbox. Stub commands exit 2. This supersedes the phase plan above for now; the phases it does not cover remain for the full product (listed in the final report).
+
+## Start checkpoint answers (owner: "all recommended")
+
+| # | Question | Answer |
+| --- | --- | --- |
+| 1 | OWNER and repositories | Reuse `AustineLomocso` and the existing public repositories; `reprise-demo-shop` gets only a README and `reprise-pages.yml` |
+| 2 | ADR number for `data_source` | ADR-13 (ADR-12 is the provider amendment) |
+| 3 | G-18 fallback | Use the newest majors: checkout v7, setup-node v7, configure-pages v6, upload-pages-artifact v5, deploy-pages v5 |
+| 4 | `@types/node` | Allowed as a third dev dependency (strict TypeScript needs Node's types) |
+| 5 | Sample provider and illustrative values | `provider: "claude"` (tokens); tokens, durations, timestamps and SHAs are chosen by hand and checked for consistency by the generator; every statistic comes from `src/stats` |
+| 6 | Absent and null values | Approved; written into `02-specs/data-contracts.md` |
+| 7 | Verification strips when runs failed | Grouped by outcome, "run order not recorded"; written into `02-specs/dashboard.md` |
+| 8 | Rounding | `statistics.md` §7 (one decimal) everywhere; §4 and §6 examples corrected |
+| 9 | Links in sample mode | Issue, PR, commit and branch references are plain text (ADR-13) |
+| 10 | Duplicate scores | Computed by a real pure implementation of `triage-pipeline.md` §3 |
+| 11 | Pinned ref | `reprise-pages.yml` pins `reprise` to a full commit SHA; `dist/reprise.mjs` is committed on `main` and CI fails if it differs from a fresh build |
+| 12 | G-11 | Temporary `issue_comment` workflow in `reprise-demo-shop` that calls `reprise-pages.yml`, run once, then removed |
+| 13 | Lighthouse | `npx lighthouse` once against the preview (not added to `package.json`) |
+| 14 | Local `reprise-smoke` | Left untouched and unpushed |
+
+## Slice plan
+
+| Step | Builds | Checkpoints |
+| --- | --- | --- |
+| 0 | Gates G-18 (fallback), G-22, G-23 (docs parts); ADR-13; contract and spec amendments | none |
+| 1 | Phase 1 scaffold: package, strict tsconfig, esbuild bundle, CLI with stubs, config loader, all schemas, `src/stats` with tests, `src/provider` interface only, `prompts/` copy, CI (typecheck, test, build, dist drift, Node 24 assert for G-8) | none |
+| 2 | Phase 6: `src/site` build-site, `dashboard/`, fonts, dedupe scoring function, sample generator and records, preview server, tests, browser review, `ui-review.md` table | none |
+| 3 | Pages: `action.yml` (build-site only), `reprise-demo-shop` README and `reprise-pages.yml`, G-22 run, G-11 | Pages settings; first live deploy |
+| 4 | Phase 8 dashboard parts: S7 in the browser, definition-of-done ticks, final report | none |
+
+## Step 0 — gates and kit amendments
+
+Plan: apply the G-18 fallback, check the two facts this slice needs (G-22 cross-repository checkout, G-23 Pages API source field) against official sources, and record ADR-13 and the approved clarifications before any code.
+
+Done:
+- G-18: fallback applied; `02-specs/github-integration.md` uses checkout v7, setup-node v7, configure-pages v6, upload-pages-artifact v5, deploy-pages v5.
+- G-22 added; docs part PASS (F-30): `gh api repos/actions/checkout/readme` shows `repository` and `ref` ("The branch, tag or SHA to checkout") inputs, and a token is needed only for private or internal secondary repositories. The run part is checked by the first `reprise-pages` run.
+- G-23 added; docs part PASS (F-31): https://docs.github.com/en/rest/pages/pages documents `build_type` `workflow`. `gh api repos/AustineLomocso/reprise-demo-shop/pages` currently returns 404 (Pages not enabled).
+- ADR-13 in `01-architecture/decisions.md`.
+- `02-specs/data-contracts.md`: `data_source` in the site index; absent and null values; medians over records that have the value.
+- `02-specs/dashboard.md`: "Sample data (ADR-13)" section with the banner copy; verification strip grouping.
+- `02-specs/statistics.md`: one-decimal display everywhere; §4 example is now "about 13.9%", §6 example "1.5% against r = 0.9%".
+- `01-architecture/architecture.md`: layout adds `src/site/`, `scripts/generate-sample-records.mjs`, `scripts/preview.mjs`, `test/fixtures/sample-records/`.
+
+Deviations and notes:
+- The null-values clarification also makes an iteration's `head_sha` null while `FIXING` (no commit exists yet), and an index entry's `sequence` null when there is no repro; both follow directly from approved item 6.
+- `median_bobcoins_per_triage` will be computed over records whose `provider` is `bob` with at least one triage-stage task, because under Claude the Bobcoin fields are 0 by contract (not a measured value). With `claude` samples it is `null`.

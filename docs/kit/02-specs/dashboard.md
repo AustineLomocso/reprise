@@ -100,6 +100,7 @@ The overview opens with the most recent before/after pair of strips rather than 
 - One cell per run in run order. Reproduced: filled with the reproduced colour. Passed: outlined with the clean colour. Invalid: rule colour with a diagonal hatch.
 - Large variant on the detail page (cells 14×28 px, 3 px gap, wraps after 40), mini variant in the list (first 20 runs, 5×12 px).
 - Each cell has a tooltip on hover and focus: "Run 7: reproduced". Tooltips open from the cell (transform origin at the cell edge they attach to).
+- Verification strips (records store only counts for verification runs, `data-contracts.md`): when every run passed, the strip is exact. When some runs failed or were invalid, the cells are drawn grouped by outcome (reproduced, then invalid, then passed), tooltips read "Reproduced (run order not recorded)", and the aria-label ends with "run order not recorded". Clarification approved by the owner, 25 Sep 2026.
 - Accessibility: the strip has `role="img"` and an `aria-label` summary ("Reproduced in 4 of 20 runs: runs 1, 4, 9, 15"); a visually hidden list gives every run for screen readers.
 
 ## Motion (team rules, apply to every UI element)
@@ -121,6 +122,10 @@ The overview opens with the most recent before/after pair of strips rather than 
 - Hash routing: `#/`, `#/issues/<N>`, `#/how-it-works`.
 - Every string from data is inserted with `textContent`. Links are built only from `url` fields that start with `https://github.com/`.
 - Content-Security-Policy meta: `default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'`.
+
+## Sample data (ADR-13)
+
+When `data/index.json` has `data_source: "sample"`, every route shows a persistent banner directly under the header, in plain text: "Sample data. These reports illustrate how Reprise works; they were not produced by a live run." It is not dismissible. In sample mode, issue, pull request, commit and branch references are shown as plain text rather than links, because the sample objects do not exist on GitHub. With `data_source: "live"` there is no banner and links follow the rule in "Data loading".
 
 ## Empty and error states
 

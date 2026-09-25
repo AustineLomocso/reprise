@@ -1,6 +1,6 @@
 # GitHub Integration Spec
 
-Action versions below are the current major versions known to the team; confirm each is still current in phase 0 (gate G-18 in `../00-context/verification-gates.md`).
+Action versions below are the newest major versions on 25 Sep 2026 (gate G-18 fallback applied with the owner's go-ahead; F-27). Release notes for every major since the original kit versions were read: nothing affects the inputs used here.
 
 ## Composite action — `reprise/action.yml`
 
@@ -17,7 +17,7 @@ Inputs:
 
 Outputs: `published` (`"true"` when a record was written).
 
-Steps: `actions/setup-node@v4` with `node-version: 24` (gate G-8), always; `node $GITHUB_ACTION_PATH/dist/reprise.mjs provider` to read `provider` from `.reprise.yml` (step output); install Bob Shell with the official script (F-7) **only** when `command` is `triage` or `fix` **and** the provider is `bob`, then log `bob --version`; `node $GITHUB_ACTION_PATH/dist/reprise.mjs <command>`.
+Steps: `actions/setup-node@v7` with `node-version: 24` (gate G-8), always; `node $GITHUB_ACTION_PATH/dist/reprise.mjs provider` to read `provider` from `.reprise.yml` (step output); install Bob Shell with the official script (F-7) **only** when `command` is `triage` or `fix` **and** the provider is `bob`, then log `bob --version`; `node $GITHUB_ACTION_PATH/dist/reprise.mjs <command>`.
 
 ## Workflows in `reprise-demo-shop/.github/workflows/`
 
@@ -44,7 +44,7 @@ jobs:
     outputs:
       published: ${{ steps.reprise.outputs.published }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -87,7 +87,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: reprise-data
           path: data
@@ -97,8 +97,8 @@ jobs:
           command: build-site
           site-data: data
           site-out: _site
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
   deploy:
@@ -115,7 +115,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 ```
 
 ## Trust

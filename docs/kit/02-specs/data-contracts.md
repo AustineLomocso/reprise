@@ -103,6 +103,14 @@ EventType:        triage.started | triage.verdict | bisect.done | rootcause.done
 
 Provider fields (ADR-12): `provider` is the provider configured in `.reprise.yml` for the most recent run that wrote this record. Every `bob_tasks` entry records `input_tokens` and `output_tokens` (both providers; `total_tokens` is their sum under Claude). Under Claude, `session_costs`, `cost.by_stage.*` and `cost.bobcoins_total` are 0; token totals are summed from `bob_tasks`. Neither unit is ever converted to currency. `tool_calls` is the count from Bob's `stats` (F-2) or the number of tool calls Claude made in the stage call.
 
+Absent and null values (clarification approved by the owner, 25 Sep 2026; adds no fields). The example above shows a record at its most complete. Earlier states leave parts empty:
+
+- `triage.verdict`, `triage.finished_at` and `triage.duration_ms` are `null` while the state is `TRIAGING`, and when triage ended in `ERROR` before a verdict.
+- `triage.repro`, `triage.bisect`, `triage.root_cause` and `triage.duplicate` are `null` when that stage did not run (for example `BLOCKED_ENV`, a `NEEDS_INFO` decided at intake, or `DUPLICATE`, which has `duplicate` but no `repro`).
+- `fix` is absent until the first `/reprise fix` or linked PR.
+- In a `fix.iterations[]` entry, `pr`, `head_sha` and `verification` are `null` while the state is `FIXING`, and `pr` and `verification` stay `null` for an iteration that ended in `FIX_ABANDONED`.
+- Why a triage ended in `BLOCKED_ENV` or `ERROR` is read from the `detail` of the last `triage.verdict` or `error` event.
+
 Rules: `events` is append-only. Strings coming from Bob or from issue text are stored after redaction (`security.md`). Arrays have documented caps: `events` 200, `bob_tasks` 100, `blocking` 50, `notable` 50.
 
 ## Site index — `data/index.json` (generated at site build, never stored on `reprise-data`)
@@ -112,6 +120,7 @@ Rules: `events` is append-only. Strings coming from Bob or from issue text are s
   "generated_at": "ISO-8601",
   "repo": "OWNER/reprise-demo-shop",
   "provider": "claude",
+  "data_source": "live",
   "totals": {
     "issues": 0,
     "by_state": { "CONFIRMED": 0 },
@@ -126,5 +135,9 @@ Rules: `events` is append-only. Strings coming from Bob or from issue text are s
 ```
 
 `regressions_caught` counts verifications with verdict `REGRESSION_DETECTED`.
+
+In `issues[]`, `verdict`, `rate`, `sequence` and `pr` are `null` when the record has no value for them (same rules as the record). Every median is computed only over records that have the value, and is `null` when no record has it.
+
+ADR-13 field: `data_source` is `"sample"` when the site was built with `reprise build-site --data-source sample` from generated sample records, and `"live"` (the default) otherwise. The dashboard shows the sample-data banner on every route when it is `"sample"` (`dashboard.md`).
 
 ADR-12 fields: `provider` is the `provider` of the most recently updated record. `issues[].tokens_total` is the sum of `input_tokens + output_tokens` over the record's `bob_tasks`. `median_tokens_per_triage` is the median, over records with at least one triage-stage task (`intake`, `dedupe`, `repro`, `rootcause`), of that record's triage-stage tokens. The dashboard shows tokens when `provider` is `claude` and Bobcoins when it is `bob`.

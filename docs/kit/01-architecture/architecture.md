@@ -32,11 +32,13 @@ reprise/
     store/                    issue record read/write on reprise-data, schema validation
     render/                   Markdown templates for comments
     security/                 minimal env, secret redaction, output scanning
+    site/                     build-site: validate records, copy dashboard, generate data/index.json
   prompts/                    runtime prompts (copied from kit 03-runtime-prompts/)
   schemas/                    JSON Schemas for every data contract
   dashboard/                  static site: index.html, app.js, styles.css, fonts/
-  scripts/                    build-dashboard-data.mjs (records -> index.json)
-  test/                       unit tests, fixtures, recorded provider responses (test/fixtures/bob/)
+  scripts/                    generate-sample-records.mjs (ADR-13), preview.mjs (local static server)
+  test/                       unit tests, fixtures, recorded provider responses (test/fixtures/bob/),
+                              sample records (test/fixtures/sample-records/issues/*.json, ADR-13)
   docs/kit/                   this kit
 ```
 

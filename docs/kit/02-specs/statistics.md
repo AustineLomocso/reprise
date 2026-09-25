@@ -56,7 +56,7 @@ When k = 0 in n valid trials, the one-sided 95% upper bound on the true failure 
 | 20 | 0.1391 |
 | 36 | 0.0798 |
 
-Used in the `NEEDS_INFO` comment: "The test never failed in 20 runs, so if this bug exists here it happens in fewer than about 14% of runs."
+Used in the `NEEDS_INFO` comment: "The test never failed in 20 runs, so if this bug exists here it happens in fewer than about 13.9% of runs." (Rounded per §7.)
 
 ## 5. Runs required to verify a fix
 
@@ -88,8 +88,8 @@ If the requirement was capped (evidence `limited`):
 
 > {runs} clean runs rule out failure rates above {1 - α^(1/runs) as %}. The bug's triage rate may be as low as {r as %}, so this is limited evidence. Consider more runs with `/reprise verify`.
 
-For 1/20 capped at 200: the bound is 1.49% against r = 0.89%.
+For 1/20 capped at 200: the bound is 1.5% against r = 0.9% (displayed per §7; unrounded 1.4867% and 0.8881%).
 
 ## 7. Rounding and display
 
-Rates display as percentages with one decimal (20.0%). Intervals display as "8.1%–41.6%". Stored values keep full precision.
+Rates, bounds and claim percentages display as percentages with one decimal (20.0%); this applies to every sentence in §4 and §6 (owner decision, 25 Sep 2026). Intervals display as "8.1%–41.6%". Stored values keep full precision.
