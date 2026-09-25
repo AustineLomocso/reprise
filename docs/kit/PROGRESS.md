@@ -241,3 +241,15 @@ Deviations and open questions (also written into the specs, marked for owner rev
 - Checkpoint 1: owner sets Settings → Pages → Source = GitHub Actions; verified with `gh api repos/AustineLomocso/reprise-demo-shop/pages` (`build_type: "workflow"`, G-23).
 - Checkpoint 2: owner approves the first deploy; the push to `main` runs it.
 - Then: G-22 run result, logged-out check of the live URL (no cookies, Playwright), G-11 with a temporary `issue_comment` workflow that calls `reprise-pages.yml`, then removed.
+
+## Step 3 — status (stopped at checkpoint 1: Pages settings)
+
+Done:
+- `action.yml` committed in `reprise` (`b38366c`). New CI job `action` runs it: `build-site` produced `_site/` from the 17 records; `command: triage` printed "Not implemented in the web-only build: triage" and failed (CI run on `b38366c`: success).
+- `reprise-demo-shop` prepared locally at `C:\Users\austi\reprise-demo-shop`, one commit (`4827856`, README and `.github/workflows/reprise-pages.yml` pinned to `b38366ca1846b8bc8a514ba8746c84a1ee3c4728`). **Not pushed**: the push to `main` starts the first deploy.
+- Checks: both YAML files parse; permissions `contents: read` (build) and `pages: write`, `id-token: write` (deploy only); `persist-credentials: false`; concurrency `pages`; no `pull_request_target`.
+- F-33 (Pages actions' inputs) recorded. Publishing-source steps taken from https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site.
+
+Waiting on the owner:
+1. Settings → Pages → Build and deployment → Source = GitHub Actions (then verified with `gh api repos/AustineLomocso/reprise-demo-shop/pages`, gate G-23).
+2. Go-ahead for the first live deploy (push of `4827856`).
