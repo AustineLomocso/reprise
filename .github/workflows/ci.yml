@@ -32,3 +32,26 @@ jobs:
           git diff --exit-code -- test/fixtures/
       - name: build-site on the sample records
         run: node dist/reprise.mjs build-site --data test/fixtures/sample-records --out _site --data-source sample
+  action:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: build-site through the composite action
+        uses: ./
+        with:
+          command: build-site
+          site-data: test/fixtures/sample-records
+          site-out: _site
+      - run: test -f _site/index.html && test -f _site/data/index.json && test -f _site/data/issues/2.json
+      - id: stub
+        name: A stub command fails
+        uses: ./
+        continue-on-error: true
+        with:
+          command: triage
+      - name: The stub command failed as expected
+        if: steps.stub.outcome != 'failure'
+        run: exit 1

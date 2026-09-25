@@ -233,3 +233,11 @@ Deviations and open questions (also written into the specs, marked for owner rev
 3. `fixes_verified` counts verifications with verdict `FIX_VERIFIED` (by analogy with the defined `regressions_caught`); the spec does not define it. The sample set shows 3 (BULK's first attempt, RACE, #19).
 4. The "How it works" copy is new text written from the specs (20 trials, no network, statistical verification); no numbers beyond the kit's defaults.
 5. The engine repository has no licence file. The kit does not name one; tell me if you want one (for example MIT) before the site goes live.
+
+## Step 3 — Pages deployment (plan)
+
+- `reprise/action.yml`: composite action with the inputs from `github-integration.md`; the first step fails any command other than `build-site` with "Not implemented in the web-only build: <command>" (exit 2); then `actions/setup-node@v7` (Node 24) and `node $GITHUB_ACTION_PATH/dist/reprise.mjs build-site`. Inputs go through `env`, never interpolated into the script. Output `published` is always `"false"`.
+- `reprise-demo-shop` (cloned to `C:\Users\austi\reprise-demo-shop`): `README.md` and `.github/workflows/reprise-pages.yml`. Triggers `workflow_call`, `workflow_dispatch`, `push` to `main`. Build job: checkout `AustineLomocso/reprise` at a pinned full commit SHA with `persist-credentials: false` (G-22), setup-node v7 (24), `node dist/reprise.mjs build-site --data test/fixtures/sample-records --out ../_site --data-source sample`, configure-pages v6, upload-pages-artifact v5 (`retention-days` default is 1, F-33). Deploy job: `pages: write`, `id-token: write`, environment `github-pages`, concurrency `pages` with cancel in progress, deploy-pages v5.
+- Checkpoint 1: owner sets Settings → Pages → Source = GitHub Actions; verified with `gh api repos/AustineLomocso/reprise-demo-shop/pages` (`build_type: "workflow"`, G-23).
+- Checkpoint 2: owner approves the first deploy; the push to `main` runs it.
+- Then: G-22 run result, logged-out check of the live URL (no cookies, Playwright), G-11 with a temporary `issue_comment` workflow that calls `reprise-pages.yml`, then removed.

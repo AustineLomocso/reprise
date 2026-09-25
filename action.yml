@@ -1,0 +1,69 @@
+name: Reprise
+description: Reproduces bug reports, measures them, helps fix them, and verifies fixes. Web-only build supports build-site only.
+author: AustineLomocso
+
+# Inputs: docs/kit/02-specs/github-integration.md "Composite action".
+# Web-only build: only `command: build-site` runs. Every other command fails with
+# "Not implemented in the web-only build: <command>" (exit code 2). The provider key inputs are
+# declared so workflows written to the spec stay valid; nothing in this build reads them.
+
+inputs:
+  command:
+    description: "triage, fix, verify (also handles merged PRs), or build-site. Only build-site is implemented in the web-only build."
+    required: true
+  github-token:
+    description: "For every command except build-site. Passed to the engine only, never to the model. Unused in the web-only build."
+    required: false
+    default: ""
+  bob-api-key:
+    description: "For triage and fix when provider is bob. Unused in the web-only build."
+    required: false
+    default: ""
+  anthropic-api-key:
+    description: "For triage and fix when provider is claude (ADR-12). Unused in the web-only build."
+    required: false
+    default: ""
+  bob-team-id:
+    description: "Passed as --team-id when set (general-type keys). Unused in the web-only build."
+    required: false
+    default: ""
+  site-data:
+    description: "build-site: directory holding issues/<N>.json records."
+    required: false
+    default: ""
+  site-out:
+    description: "build-site: output directory for the site."
+    required: false
+    default: ""
+
+outputs:
+  published:
+    description: '"true" when a record was written. Always "false" in the web-only build.'
+    value: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Check the command
+      shell: bash
+      env:
+        REPRISE_COMMAND: ${{ inputs.command }}
+      run: |
+        if [ "$REPRISE_COMMAND" != "build-site" ]; then
+          echo "Not implemented in the web-only build: $REPRISE_COMMAND"
+          exit 2
+        fi
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 24
+    - name: reprise build-site
+      shell: bash
+      env:
+        SITE_DATA: ${{ inputs.site-data }}
+        SITE_OUT: ${{ inputs.site-out }}
+      run: |
+        if [ -z "$SITE_DATA" ] || [ -z "$SITE_OUT" ]; then
+          echo "build-site needs the site-data and site-out inputs"
+          exit 1
+        fi
+        node "$GITHUB_ACTION_PATH/dist/reprise.mjs" build-site --data "$SITE_DATA" --out "$SITE_OUT"
