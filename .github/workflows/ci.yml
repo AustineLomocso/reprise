@@ -1,0 +1,28 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Node 24 (gate G-8)
+        run: |
+          v="$(node --version)"
+          echo "node $v"
+          case "$v" in v24.*) echo "G-8 PASS" ;; *) echo "G-8 FAIL: expected v24.x"; exit 1 ;; esac
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Committed dist/reprise.mjs matches a fresh build
+        run: git diff --exit-code -- dist/

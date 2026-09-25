@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/reprise-config.schema.json",
+  "title": "Reprise target repository config (.reprise.yml)",
+  "description": "docs/kit/01-architecture/architecture.md, \"Target repo contract\". Only version and sandbox.dockerfile are required; every other value has the default shown there (src/config/defaults.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "sandbox"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dockerfile"
+      ],
+      "properties": {
+        "dockerfile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "type": "string",
+          "minLength": 1
+        },
+        "single": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report": {
+          "enum": [
+            "junit",
+            "tap"
+          ]
+        },
+        "repro_dir": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "edit_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repro": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "fix": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "never": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "triage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trials": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_repro_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_auto_retriage": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bisect": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fix": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "verify": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "regression_reruns": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "provider": {
+      "enum": [
+        "claude",
+        "bob"
+      ]
+    },
+    "bob": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intake": {
+              "type": "number",
+              "minimum": 0
+            },
+            "dedupe": {
+              "type": "number",
+              "minimum": 0
+            },
+            "repro": {
+              "type": "number",
+              "minimum": 0
+            },
+            "rootcause": {
+              "type": "number",
+              "minimum": 0
+            },
+            "fix": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "max_turns": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intake": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "dedupe": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "repro": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "rootcause": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fix": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "claude": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "max_tokens": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intake": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "dedupe": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "repro": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "rootcause": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fix": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "max_tool_turns": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intake": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "dedupe": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "repro": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "rootcause": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fix": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

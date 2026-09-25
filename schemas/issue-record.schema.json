@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/issue-record.schema.json",
+  "title": "Reprise issue record (issues/<N>.json on reprise-data)",
+  "description": "docs/kit/02-specs/data-contracts.md, 'Issue record', including 'Absent and null values'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "repo", "issue", "title", "url", "provider", "state", "created_at", "updated_at",
+    "triage_runs", "auto_retriage_count", "triage", "resolution_note", "cost", "events"
+  ],
+  "properties": {
+    "schema": { "const": 1 },
+    "repo": { "$ref": "#/$defs/Repo" },
+    "issue": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "provider": { "$ref": "#/$defs/Provider" },
+    "state": { "$ref": "#/$defs/State" },
+    "created_at": { "$ref": "#/$defs/Timestamp" },
+    "updated_at": { "$ref": "#/$defs/Timestamp" },
+    "triage_runs": { "type": "integer", "minimum": 0 },
+    "auto_retriage_count": { "type": "integer", "minimum": 0 },
+    "triage": { "$ref": "#/$defs/Triage" },
+    "fix": { "$ref": "#/$defs/Fix" },
+    "resolution_note": { "type": "string" },
+    "cost": { "$ref": "#/$defs/Cost" },
+    "events": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/Event" } }
+  },
+  "$defs": {
+    "State": {
+      "enum": [
+        "NEW", "TRIAGING", "CONFIRMED", "FLAKY", "DUPLICATE", "NEEDS_INFO", "BLOCKED_ENV", "ERROR",
+        "FIXING", "FIX_ABANDONED", "VERIFYING", "FIX_VERIFIED", "FIX_INCOMPLETE", "REGRESSION_DETECTED", "RESOLVED"
+      ]
+    },
+    "TriageVerdict": { "enum": ["CONFIRMED", "FLAKY", "DUPLICATE", "NEEDS_INFO", "BLOCKED_ENV"] },
+    "VerifyVerdict": { "enum": ["FIX_VERIFIED", "FIX_INCOMPLETE", "REGRESSION_DETECTED"] },
+    "TrialOutcome": { "enum": ["PASS", "FAIL_MATCH", "FAIL_OTHER", "ERROR"] },
+    "SignatureKind": { "enum": ["assertion_message", "error_type", "output_regex", "timeout"] },
+    "BisectStatus": { "enum": ["found", "no_good_commit", "skipped", "timeout", "error"] },
+    "Evidence": { "enum": ["strong", "limited"] },
+    "FixSource": { "enum": ["bob", "human"] },
+    "TestClass": {
+      "enum": [
+        "UNCHANGED_PASS", "NEWLY_PASSING", "PRE_EXISTING_FAILURE", "PRE_EXISTING_FLAKY",
+        "ADDED_PASSING", "ADDED_FAILING", "REMOVED", "REGRESSION"
+      ]
+    },
+    "Stage": { "enum": ["intake", "dedupe", "repro", "rootcause", "fix"] },
+    "Provider": { "enum": ["claude", "bob"] },
+    "EventType": {
+      "enum": [
+        "triage.started", "triage.verdict", "bisect.done", "rootcause.done", "fix.started", "fix.iteration",
+        "fix.pr_opened", "fix.abandoned", "verify.started", "verify.verdict", "resolved", "error"
+      ]
+    },
+    "Repo": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "Timestamp": { "type": "string", "format": "date-time" },
+    "Probability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Count": { "type": "integer", "minimum": 0 },
+    "Fingerprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "functions", "symptom", "trigger", "expected", "actual", "error_signature"],
+      "properties": {
+        "component": { "type": "string" },
+        "functions": { "type": "array", "items": { "type": "string" } },
+        "symptom": { "type": "string" },
+        "trigger": { "type": "string" },
+        "expected": { "type": "string" },
+        "actual": { "type": "string" },
+        "error_signature": { "type": "string" }
+      }
+    },
+    "FieldScore": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "Duplicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["of", "score", "fields", "reason", "behaviour_check"],
+      "properties": {
+        "of": { "type": ["integer", "null"], "minimum": 1 },
+        "score": { "$ref": "#/$defs/FieldScore" },
+        "fields": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "component": { "$ref": "#/$defs/FieldScore" },
+            "functions": { "$ref": "#/$defs/FieldScore" },
+            "symptom": { "$ref": "#/$defs/FieldScore" },
+            "trigger": { "$ref": "#/$defs/FieldScore" },
+            "error_signature": { "$ref": "#/$defs/FieldScore" }
+          }
+        },
+        "reason": { "type": "string" },
+        "behaviour_check": {
+          "description": "Outcome of running the candidate's repro test once on the current code (triage-pipeline.md section 3), or null when it did not run.",
+          "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/TrialOutcome" }]
+        }
+      }
+    },
+    "Signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "pattern"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/SignatureKind" },
+        "pattern": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "Repro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "test_file", "test_sha256", "branch", "signature", "attempts", "scope_violations",
+        "trials", "failed", "invalid", "sequence", "rate", "wilson_low", "wilson_high"
+      ],
+      "properties": {
+        "test_file": { "type": "string" },
+        "test_sha256": { "type": "string", "pattern": "^([0-9a-f]{64})?$" },
+        "branch": { "type": "string" },
+        "signature": { "$ref": "#/$defs/Signature" },
+        "attempts": { "$ref": "#/$defs/Count" },
+        "scope_violations": { "type": "array", "items": { "type": "string" } },
+        "trials": { "$ref": "#/$defs/Count" },
+        "failed": { "$ref": "#/$defs/Count" },
+        "invalid": { "$ref": "#/$defs/Count" },
+        "sequence": { "type": "string", "pattern": "^[PFX]*$" },
+        "rate": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Probability" }] },
+        "wilson_low": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Probability" }] },
+        "wilson_high": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Probability" }] }
+      }
+    },
+    "Bisect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "good_sha", "first_bad_sha", "subject", "author", "date", "url", "reason"],
+      "properties": {
+        "status": { "$ref": "#/$defs/BisectStatus" },
+        "good_sha": { "type": "string" },
+        "first_bad_sha": { "type": "string" },
+        "subject": { "type": "string" },
+        "author": { "type": "string" },
+        "date": { "type": "string" },
+        "url": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "start_line", "end_line", "reason"],
+      "properties": {
+        "file": { "type": "string" },
+        "start_line": { "type": "integer", "minimum": 1 },
+        "end_line": { "type": "integer", "minimum": 1 },
+        "reason": { "type": "string" }
+      }
+    },
+    "RootCause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "locations", "fix_direction", "confidence", "ide_prompt"],
+      "properties": {
+        "summary": { "type": "string" },
+        "locations": { "type": "array", "items": { "$ref": "#/$defs/Location" } },
+        "fix_direction": { "type": "string" },
+        "confidence": { "type": "string" },
+        "ide_prompt": { "type": "string" }
+      }
+    },
+    "Triage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verdict", "started_at", "finished_at", "duration_ms", "fingerprint", "duplicate", "question",
+        "baseline_suite", "repro", "bisect", "root_cause"
+      ],
+      "properties": {
+        "verdict": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/TriageVerdict" }] },
+        "started_at": { "$ref": "#/$defs/Timestamp" },
+        "finished_at": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Timestamp" }] },
+        "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+        "fingerprint": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Fingerprint" }] },
+        "duplicate": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Duplicate" }] },
+        "question": { "type": "string" },
+        "baseline_suite": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sha", "passed", "failed"],
+              "properties": {
+                "sha": { "type": "string" },
+                "passed": { "$ref": "#/$defs/Count" },
+                "failed": { "$ref": "#/$defs/Count" }
+              }
+            }
+          ]
+        },
+        "repro": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Repro" }] },
+        "bisect": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Bisect" }] },
+        "root_cause": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/RootCause" }] }
+      }
+    },
+    "ClassCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "UNCHANGED_PASS", "NEWLY_PASSING", "PRE_EXISTING_FAILURE", "PRE_EXISTING_FLAKY",
+        "ADDED_PASSING", "ADDED_FAILING", "REMOVED", "REGRESSION"
+      ],
+      "properties": {
+        "UNCHANGED_PASS": { "$ref": "#/$defs/Count" },
+        "NEWLY_PASSING": { "$ref": "#/$defs/Count" },
+        "PRE_EXISTING_FAILURE": { "$ref": "#/$defs/Count" },
+        "PRE_EXISTING_FLAKY": { "$ref": "#/$defs/Count" },
+        "ADDED_PASSING": { "$ref": "#/$defs/Count" },
+        "ADDED_FAILING": { "$ref": "#/$defs/Count" },
+        "REMOVED": { "$ref": "#/$defs/Count" },
+        "REGRESSION": { "$ref": "#/$defs/Count" }
+      }
+    },
+    "Verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "finished_at", "repro", "regression"],
+      "properties": {
+        "verdict": { "$ref": "#/$defs/VerifyVerdict" },
+        "finished_at": { "$ref": "#/$defs/Timestamp" },
+        "repro": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["runs_required", "runs", "failed", "invalid", "evidence", "claim", "injected"],
+          "properties": {
+            "runs_required": { "$ref": "#/$defs/Count" },
+            "runs": { "$ref": "#/$defs/Count" },
+            "failed": { "$ref": "#/$defs/Count" },
+            "invalid": { "$ref": "#/$defs/Count" },
+            "evidence": {
+              "description": "strong or limited when every run passed (statistics.md section 6); null otherwise.",
+              "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Evidence" }]
+            },
+            "claim": { "type": "string" },
+            "injected": { "type": "boolean" }
+          }
+        },
+        "regression": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tests_total", "counts", "blocking", "notable"],
+          "properties": {
+            "tests_total": { "$ref": "#/$defs/Count" },
+            "counts": { "$ref": "#/$defs/ClassCounts" },
+            "blocking": {
+              "type": "array",
+              "maxItems": 50,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "class", "base", "head", "message"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "class": { "$ref": "#/$defs/TestClass" },
+                  "base": { "type": "string" },
+                  "head": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            },
+            "notable": {
+              "type": "array",
+              "maxItems": 50,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "class"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "class": { "$ref": "#/$defs/TestClass" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Iteration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "n", "source", "pr", "branch", "base_sha", "head_sha", "bob_iterations", "scope_violations", "summary", "verification"
+      ],
+      "properties": {
+        "n": { "type": "integer", "minimum": 1 },
+        "source": { "$ref": "#/$defs/FixSource" },
+        "pr": { "type": ["integer", "null"], "minimum": 1 },
+        "branch": { "type": "string" },
+        "base_sha": { "type": "string" },
+        "head_sha": { "type": ["string", "null"] },
+        "bob_iterations": { "$ref": "#/$defs/Count" },
+        "scope_violations": { "type": "array", "items": { "type": "string" } },
+        "summary": { "type": "string" },
+        "verification": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/Verification" }] }
+      }
+    },
+    "Fix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["iterations"],
+      "properties": {
+        "iterations": { "type": "array", "items": { "$ref": "#/$defs/Iteration" } }
+      }
+    },
+    "StageCosts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intake", "dedupe", "repro", "rootcause", "fix"],
+      "properties": {
+        "intake": { "type": "number", "minimum": 0 },
+        "dedupe": { "type": "number", "minimum": 0 },
+        "repro": { "type": "number", "minimum": 0 },
+        "rootcause": { "type": "number", "minimum": 0 },
+        "fix": { "type": "number", "minimum": 0 }
+      }
+    },
+    "Cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bobcoins_total", "by_stage", "bob_tasks"],
+      "properties": {
+        "bobcoins_total": { "type": "number", "minimum": 0 },
+        "by_stage": { "$ref": "#/$defs/StageCosts" },
+        "bob_tasks": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stage", "task_id", "session_costs", "duration_ms", "total_tokens", "input_tokens", "output_tokens", "tool_calls"
+            ],
+            "properties": {
+              "stage": { "$ref": "#/$defs/Stage" },
+              "task_id": { "type": "string" },
+              "session_costs": { "type": "number", "minimum": 0 },
+              "duration_ms": { "$ref": "#/$defs/Count" },
+              "total_tokens": { "$ref": "#/$defs/Count" },
+              "input_tokens": { "$ref": "#/$defs/Count" },
+              "output_tokens": { "$ref": "#/$defs/Count" },
+              "tool_calls": { "$ref": "#/$defs/Count" }
+            }
+          }
+        }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "type", "detail"],
+      "properties": {
+        "at": { "$ref": "#/$defs/Timestamp" },
+        "type": { "$ref": "#/$defs/EventType" },
+        "detail": { "type": "string" }
+      }
+    }
+  }
+}

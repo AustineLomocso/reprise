@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/rootcause.schema.json",
+  "title": "Root cause stage output",
+  "description": "docs/kit/02-specs/triage-pipeline.md section 8. The spec gives only the example value \"high\" for confidence, so it is not constrained to an enumeration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "locations", "fix_direction", "confidence"],
+  "properties": {
+    "summary": { "type": "string" },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "start_line", "end_line", "reason"],
+        "properties": {
+          "file": { "type": "string" },
+          "start_line": { "type": "integer", "minimum": 1 },
+          "end_line": { "type": "integer", "minimum": 1 },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "fix_direction": { "type": "string" },
+    "confidence": { "type": "string" }
+  }
+}

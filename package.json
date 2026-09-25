@@ -1,0 +1,30 @@
+{
+  "name": "reprise",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reprise engine: reproduces bug reports, measures them, helps fix them, and verifies fixes, inside GitHub.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "reprise": "dist/reprise.mjs"
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "build:dev": "node esbuild.config.mjs --dev",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node esbuild.config.mjs --dev && node --test \".build/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

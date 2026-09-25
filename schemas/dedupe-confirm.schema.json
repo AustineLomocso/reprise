@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/dedupe-confirm.schema.json",
+  "title": "Dedupe confirmation stage output",
+  "description": "docs/kit/02-specs/data-contracts.md, 'Stage outputs'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["same_bug", "reason"],
+  "properties": {
+    "same_bug": { "type": "boolean" },
+    "reason": { "type": "string" }
+  }
+}

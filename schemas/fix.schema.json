@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/fix.schema.json",
+  "title": "Fix stage output (propose and revise)",
+  "description": "docs/kit/02-specs/data-contracts.md, 'Stage outputs'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "files_changed", "risk_notes", "tests_added"],
+  "properties": {
+    "summary": { "type": "string" },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "risk_notes": { "type": "string" },
+    "tests_added": { "type": "array", "items": { "type": "string" } }
+  }
+}

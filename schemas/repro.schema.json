@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AustineLomocso/reprise/schemas/repro.schema.json",
+  "title": "Repro stage output (write and revise)",
+  "description": "docs/kit/02-specs/data-contracts.md, 'Stage outputs'; triage-pipeline.md section 5.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["test_file", "signature", "rationale"],
+  "properties": {
+    "test_file": { "type": "string", "minLength": 1 },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "pattern"],
+      "properties": {
+        "kind": { "enum": ["assertion_message", "error_type", "output_regex", "timeout"] },
+        "pattern": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "rationale": { "type": "string" }
+  }
+}

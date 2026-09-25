@@ -157,3 +157,17 @@ Done:
 Deviations and notes:
 - The null-values clarification also makes an iteration's `head_sha` null while `FIXING` (no commit exists yet), and an index entry's `sequence` null when there is no repro; both follow directly from approved item 6.
 - `median_bobcoins_per_triage` will be computed over records whose `provider` is `bob` with at least one triage-stage task, because under Claude the Bobcoin fields are 0 by contract (not a measured value). With `claude` samples it is `null`.
+
+## Step 1 — phase 1 engine scaffold (plan)
+
+- `package.json` (type module, engines `>=24`, exact versions): runtime `yaml`, `ajv`, `ajv-formats`; dev `typescript`, `esbuild`, `@types/node` (24.x, matching the runtime).
+- `tsconfig.json` strict, `module`/`moduleResolution` `nodenext`, no emit (esbuild compiles).
+- `esbuild.config.mjs`: default mode bundles `src/cli.ts` into `dist/reprise.mjs` (node24, ESM, schemas inlined); `--dev` bundles each test file and `src/lib.ts` into `.build/` (dependencies external) so `node --test` runs compiled JavaScript and the sample generator can import the real stats code. Nothing relies on Node's TypeScript stripping.
+- `src/cli.ts`: hand-written argument parser, `--help` for every command. `build-site` is wired in step 2; `triage`, `fix`, `verify`, `run --local`, `publish`, `provider` exit 2 with "Not implemented in the web-only build: <command>".
+- `src/config/`: load `.reprise.yml` with `yaml`, validate with `schemas/reprise-config.schema.json`, apply the defaults from `architecture.md`.
+- `schemas/`: reprise-config, intake, dedupe-confirm, repro, rootcause, fix, issue-record, site-index (with `data_source`), draft 2020-12, `additionalProperties: false`.
+- `src/stats/`: `wilson`, `zeroFailureBound`, `requiredRuns`, `verdictFromTrials`, claim and bound sentences, display formatting.
+- `src/provider/index.ts`: the `runStage` interface and the stage table from `bob-integration.md`, no implementation.
+- `prompts/`: copy of `03-runtime-prompts/`, unchanged.
+- Tests: every worked example in `statistics.md` to 4 decimals; every verdict branch; config (missing, invalid, defaults); schemas (the examples in `data-contracts.md` validate, unknown enum fails); CLI stubs exit 2.
+- CI `.github/workflows/ci.yml`: Node 24 assert (G-8), `npm ci`, typecheck, test, build, `git diff --exit-code dist/`.
