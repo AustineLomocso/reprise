@@ -253,3 +253,11 @@ Done:
 Waiting on the owner:
 1. Settings → Pages → Build and deployment → Source = GitHub Actions (then verified with `gh api repos/AustineLomocso/reprise-demo-shop/pages`, gate G-23).
 2. Go-ahead for the first live deploy (push of `4827856`).
+
+## Step 3 — status (stopped at checkpoint 2: first live deploy)
+
+- Checkpoint 1 done: the owner set the Pages source. G-23 PASS live: `build_type: "workflow"`, `html_url: "https://austinelomocso.github.io/reprise-demo-shop/"`.
+- Owner asked for a design pass (`/frontend-design`). Done within `dashboard.md`; findings and checks in `05-quality/ui-review.md` Review 2; commit `ca67ac7` (CI green: `check` and `action` jobs).
+- `reprise-demo-shop` local commit re-pinned to `ca67ac7b32e07277539825c7b4ce0420742db93a` (now `c90873b`, still unpushed). The pinned commit contains `dist/reprise.mjs` and the sample records (`git cat-file -e`).
+
+Waiting on the owner: go-ahead for the first live deploy (push of `c90873b` to `reprise-demo-shop` `main`).
