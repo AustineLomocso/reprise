@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 12,
+  "title": "Checkout crashes when a product SKU contains a slash",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/12",
+  "provider": "claude",
+  "state": "BLOCKED_ENV",
+  "created_at": "2026-09-24T07:05:00Z",
+  "updated_at": "2026-09-24T07:06:02Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "BLOCKED_ENV",
+    "started_at": "2026-09-24T07:05:20Z",
+    "finished_at": "2026-09-24T07:06:02Z",
+    "duration_ms": 42000,
+    "fingerprint": {
+      "component": "cart",
+      "functions": [
+        "checkout"
+      ],
+      "symptom": "checkout throws when a product sku contains a slash",
+      "trigger": "cart with the sku MUG/RED",
+      "expected": "order placed",
+      "actual": "TypeError thrown from checkout",
+      "error_signature": "TypeError: Cannot read properties of undefined"
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": null,
+    "repro": null,
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_eeb8801d10ed7da7db29",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6375,
+        "input_tokens": 5960,
+        "output_tokens": 415,
+        "tool_calls": 4
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T07:05:20Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T07:06:02Z",
+      "type": "triage.verdict",
+      "detail": ".reprise.yml does not match the config schema: /sandbox must have required property 'dockerfile'. The sandbox cannot be built without sandbox.dockerfile."
+    }
+  ],
+  "resolution_note": ""
+}

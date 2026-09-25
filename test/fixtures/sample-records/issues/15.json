@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 15,
+  "title": "Checkout succeeds with a ₱0.00 total when everything is out of stock",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/15",
+  "provider": "claude",
+  "state": "FIXING",
+  "created_at": "2026-09-25T00:40:00Z",
+  "updated_at": "2026-09-25T01:39:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "CONFIRMED",
+    "started_at": "2026-09-25T00:40:10Z",
+    "finished_at": "2026-09-25T00:46:30Z",
+    "duration_ms": 380000,
+    "fingerprint": {
+      "component": "cart",
+      "functions": [
+        "checkout",
+        "reserve"
+      ],
+      "symptom": "checkout reports success with a zero total when every item is out of stock",
+      "trigger": "checkout of a cart whose only product has no stock left",
+      "expected": "checkout fails with out of stock",
+      "actual": "ok true with totalCents 0",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-15.test.js",
+      "test_sha256": "7903eef92915f5df9077247a6fa73e7f5418b539f3fb7cf46b6c22a47f5ad9a5",
+      "branch": "reprise/repro-15",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "true !== false"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 20,
+      "invalid": 0,
+      "sequence": "FFFFFFFFFFFFFFFFFFFF",
+      "rate": 1,
+      "wilson_low": 0.8388748419471806,
+      "wilson_high": 1
+    },
+    "bisect": {
+      "status": "found",
+      "good_sha": "6953d1a5456b05eddf48bb7aad0ffbb15fa2a940",
+      "first_bad_sha": "a6fce0ae4e73263659928669b385c8f257288d29",
+      "subject": "feat: skip lines that cannot be reserved",
+      "author": "demo-shop maintainer",
+      "date": "2026-09-23T12:00:00Z",
+      "url": "https://github.com/AustineLomocso/reprise-demo-shop/commit/a6fce0ae4e73263659928669b385c8f257288d29",
+      "reason": ""
+    },
+    "root_cause": {
+      "summary": "checkout skips lines whose reservation fails instead of failing the order, so an order with no reservable lines succeeds with a zero total.",
+      "locations": [
+        {
+          "file": "src/cart.js",
+          "start_line": 14,
+          "end_line": 19,
+          "reason": "a failed reservation is skipped with continue"
+        }
+      ],
+      "fix_direction": "Fail the whole checkout when any reservation fails, and release the reservations already made.",
+      "confidence": "high",
+      "ide_prompt": "Fix GitHub issue #15 in this repository.\nReproduction test: test/reprise/issue-15.test.js (get it with: git checkout origin/reprise/repro-15 -- test/reprise/issue-15.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-15.test.js. It currently fails with: Expected values to be strictly equal: true !== false\nLikely cause: checkout skips lines whose reservation fails instead of failing the order, so an order with no reservable lines succeeds with a zero total.\nLocations: src/cart.js lines 14–19\nIntroduced in a6fce0a (feat: skip lines that cannot be reserved).\nRules: do not modify test/reprise/issue-15.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #15\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "bob",
+        "pr": null,
+        "branch": "reprise/fix-15",
+        "base_sha": "34616f3a8cb00a3d870efa25f7a8fcef78ac97b5",
+        "head_sha": null,
+        "bob_iterations": 1,
+        "scope_violations": [],
+        "summary": "",
+        "verification": null
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_c7aedc09467f69942783",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6200,
+        "input_tokens": 5800,
+        "output_tokens": 400,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_9149f121cb7fe9e33958",
+        "session_costs": 0,
+        "duration_ms": 90000,
+        "total_tokens": 19600,
+        "input_tokens": 18000,
+        "output_tokens": 1600,
+        "tool_calls": 9
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_908684dde82bf2728b38",
+        "session_costs": 0,
+        "duration_ms": 40000,
+        "total_tokens": 13700,
+        "input_tokens": 13000,
+        "output_tokens": 700,
+        "tool_calls": 6
+      },
+      {
+        "stage": "fix",
+        "task_id": "msg_sample_010640b5c32611e121ae",
+        "session_costs": 0,
+        "duration_ms": 146000,
+        "total_tokens": 33150,
+        "input_tokens": 30400,
+        "output_tokens": 2750,
+        "tool_calls": 13
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-25T00:40:10Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-25T00:46:30Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 20 of 20 runs."
+    },
+    {
+      "at": "2026-09-25T01:30:00Z",
+      "type": "fix.started",
+      "detail": "/reprise fix from a maintainer."
+    },
+    {
+      "at": "2026-09-25T01:39:00Z",
+      "type": "fix.iteration",
+      "detail": "Round 1: the full suite showed one test going from pass to fail; revising."
+    }
+  ],
+  "resolution_note": ""
+}

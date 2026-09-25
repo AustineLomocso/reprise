@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 17,
+  "title": "Saved cart sometimes comes back with an older quantity",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/17",
+  "provider": "claude",
+  "state": "FIX_INCOMPLETE",
+  "created_at": "2026-09-24T13:00:00Z",
+  "updated_at": "2026-09-24T19:40:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "FLAKY",
+    "started_at": "2026-09-24T13:00:20Z",
+    "finished_at": "2026-09-24T13:08:45Z",
+    "duration_ms": 505000,
+    "fingerprint": {
+      "component": "store",
+      "functions": [
+        "set"
+      ],
+      "symptom": "saved cart sometimes comes back with an older quantity",
+      "trigger": "changing a quantity in two browser tabs within a second",
+      "expected": "the latest quantity is kept",
+      "actual": "an earlier quantity is restored",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-17.test.js",
+      "test_sha256": "0648001c23299c687b4b6850f51ccb7a5b52352ed834f3a355fe7a73e718de3f",
+      "branch": "reprise/repro-17",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "quantity 3 !== 5"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 6,
+      "invalid": 0,
+      "sequence": "PPFPPFPPPFPPFPPPFPPF",
+      "rate": 0.3,
+      "wilson_low": 0.1454772448676043,
+      "wilson_high": 0.5189728183535235
+    },
+    "bisect": {
+      "status": "skipped",
+      "good_sha": "",
+      "first_bad_sha": "",
+      "subject": "",
+      "author": "",
+      "date": "",
+      "url": "",
+      "reason": "bisect is unreliable for intermittent failures"
+    },
+    "root_cause": {
+      "summary": "Two set() calls for the same key can resolve out of order, so the older write can land last.",
+      "locations": [
+        {
+          "file": "src/store.js",
+          "start_line": 9,
+          "end_line": 16,
+          "reason": "writes resolve after independent random delays with no ordering"
+        }
+      ],
+      "fix_direction": "Order writes per key, for example with a version number checked on write.",
+      "confidence": "medium",
+      "ide_prompt": "Fix GitHub issue #17 in this repository.\nReproduction test: test/reprise/issue-17.test.js (get it with: git checkout origin/reprise/repro-17 -- test/reprise/issue-17.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-17.test.js. It currently fails with: AssertionError: quantity 3 !== 5\nLikely cause: Two set() calls for the same key can resolve out of order, so the older write can land last.\nLocations: src/store.js lines 9–16\nThe first bad commit was not searched: the failure is intermittent.\nRules: do not modify test/reprise/issue-17.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #17\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "human",
+        "pr": 22,
+        "branch": "retry-store-write",
+        "base_sha": "fe50f8d071a0f2d2afbdcf320ea61a67a2c67bc1",
+        "head_sha": "940280c080cc8d726d460fb2d1f6997a4a742b49",
+        "bob_iterations": 0,
+        "scope_violations": [],
+        "summary": "Retry store.set once when a write races with another.",
+        "verification": {
+          "verdict": "FIX_INCOMPLETE",
+          "finished_at": "2026-09-24T19:40:00Z",
+          "repro": {
+            "runs_required": 20,
+            "runs": 20,
+            "failed": 3,
+            "invalid": 0,
+            "evidence": null,
+            "claim": "",
+            "injected": false
+          },
+          "regression": {
+            "tests_total": 12,
+            "counts": {
+              "UNCHANGED_PASS": 12,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 0,
+              "ADDED_FAILING": 0,
+              "REMOVED": 0,
+              "REGRESSION": 0
+            },
+            "blocking": [],
+            "notable": []
+          }
+        }
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_bff46e82f1df83ea3e60",
+        "session_costs": 0,
+        "duration_ms": 18000,
+        "total_tokens": 6040,
+        "input_tokens": 5650,
+        "output_tokens": 390,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_e4c9e54e688f13f460de",
+        "session_costs": 0,
+        "duration_ms": 95000,
+        "total_tokens": 21600,
+        "input_tokens": 19900,
+        "output_tokens": 1700,
+        "tool_calls": 10
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_cbdee8af70fbfa439d6f",
+        "session_costs": 0,
+        "duration_ms": 41000,
+        "total_tokens": 14640,
+        "input_tokens": 13900,
+        "output_tokens": 740,
+        "tool_calls": 6
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T13:00:20Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T13:08:45Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 6 of 20 runs (30.0%)."
+    },
+    {
+      "at": "2026-09-24T19:10:00Z",
+      "type": "verify.started",
+      "detail": "Pull request #22."
+    },
+    {
+      "at": "2026-09-24T19:40:00Z",
+      "type": "verify.verdict",
+      "detail": "Still reproduces: failed 3 of 20 runs."
+    }
+  ],
+  "resolution_note": ""
+}

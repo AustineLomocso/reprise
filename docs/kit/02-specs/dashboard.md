@@ -100,8 +100,18 @@ The overview opens with the most recent before/after pair of strips rather than 
 - One cell per run in run order. Reproduced: filled with the reproduced colour. Passed: outlined with the clean colour. Invalid: rule colour with a diagonal hatch.
 - Large variant on the detail page (cells 14×28 px, 3 px gap, wraps after 40), mini variant in the list (first 20 runs, 5×12 px).
 - Each cell has a tooltip on hover and focus: "Run 7: reproduced". Tooltips open from the cell (transform origin at the cell edge they attach to).
-- Verification strips (records store only counts for verification runs, `data-contracts.md`): when every run passed, the strip is exact. When some runs failed or were invalid, the cells are drawn grouped by outcome (reproduced, then invalid, then passed), tooltips read "Reproduced (run order not recorded)", and the aria-label ends with "run order not recorded". Clarification approved by the owner, 25 Sep 2026.
+- Verification strips (records store only counts for verification runs, `data-contracts.md`): when every run had the same outcome, the strip is exact. Otherwise the cells are drawn grouped by outcome (reproduced, then invalid, then passed), tooltips read "Reproduced (run order not recorded)", the aria-label ends with "run order not recorded", and a visible sentence under the strip says the order was not recorded. Clarification approved by the owner, 25 Sep 2026.
 - Accessibility: the strip has `role="img"` and an `aria-label` summary ("Reproduced in 4 of 20 runs: runs 1, 4, 9, 15"); a visually hidden list gives every run for screen readers.
+
+### Implementation decisions from the web-only slice (reported to the owner for review)
+
+- **Keyboard access to cells.** An element with `role="img"` cannot contain focusable children, and a 200-run strip would be 200 tab stops. The large strip is therefore one tab stop: focusing it shows the tooltip of the current cell; arrow keys, Home and End move between cells; Escape closes the tooltip. Pointer users get the same tooltip on hover.
+- **Mini strip.** The mini strip in the report list keeps the `aria-label` summary but has no per-cell tooltips, focus or hidden run list: 17 rows of 20 cells would bury the table for keyboard and screen-reader users, and the detail page carries the full strip.
+- **Narrow screens.** Below 40 rem the Trials column is hidden and the mini strip (two rows of ten) sits under the result in the same row, so every verdict still sits next to its runs.
+- **Fix source.** `FixSource` `bob` is shown as "Proposed by Reprise" and `human` as "Written by a person" (the wireframe says "Bob or person"; under ADR-12 the provider may not be Bob).
+- **Colour of states.** Filled reproduced colour: `CONFIRMED`, `FIX_INCOMPLETE`, `REGRESSION_DETECTED`. Filled intermittent colour: `FLAKY`. Outlined clean colour: `FIX_VERIFIED` only. Every other state, including `RESOLVED` (which may be "merged without passing verification"), is an outlined ink square. The words always sit next to the mark.
+- **Latest pair.** The overview's before/after pair is the most recently updated record that has a triage sequence and a verification with at least one run.
+- **Intermittent colour as text.** Light-scheme intermittent `#9A6A00` on Mist is 4.32:1, below AA for body text, so it is used only for graphics (strip cells, marks, the diagram), where the non-text minimum is 3:1.
 
 ## Motion (team rules, apply to every UI element)
 

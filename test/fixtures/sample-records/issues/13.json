@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 13,
+  "title": "Cart with more than 50 lines returns the wrong total",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/13",
+  "provider": "claude",
+  "state": "ERROR",
+  "created_at": "2026-09-24T09:12:00Z",
+  "updated_at": "2026-09-24T09:31:10Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": null,
+    "started_at": "2026-09-24T09:12:30Z",
+    "finished_at": null,
+    "duration_ms": null,
+    "fingerprint": {
+      "component": "cart",
+      "functions": [
+        "checkout",
+        "lineTotal"
+      ],
+      "symptom": "wrong total for carts with more than 50 lines",
+      "trigger": "checkout of a cart with 60 lines",
+      "expected": "total equal to the sum of the line totals",
+      "actual": "total lower than the sum",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-13.test.js",
+      "test_sha256": "5c2a26eabc6071c01315ebbc688d8e835534a0ac8c2df14a54ea33fe308bce6b",
+      "branch": "reprise/repro-13",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "total \\d+ !== sum \\d+"
+      },
+      "attempts": 3,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 5,
+      "invalid": 5,
+      "sequence": "PFXPFXPPFXPFPPXFPPXP",
+      "rate": null,
+      "wilson_low": null,
+      "wilson_high": null
+    },
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_09c203863bb3ea0ceae9",
+        "session_costs": 0,
+        "duration_ms": 20000,
+        "total_tokens": 6470,
+        "input_tokens": 6050,
+        "output_tokens": 420,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_f04f010e950ffe1e6d0f",
+        "session_costs": 0,
+        "duration_ms": 118000,
+        "total_tokens": 24380,
+        "input_tokens": 22400,
+        "output_tokens": 1980,
+        "tool_calls": 12
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_a23beb385240ddaf1f4e",
+        "session_costs": 0,
+        "duration_ms": 83000,
+        "total_tokens": 27410,
+        "input_tokens": 25900,
+        "output_tokens": 1510,
+        "tool_calls": 7
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_016944b4d414da760626",
+        "session_costs": 0,
+        "duration_ms": 80000,
+        "total_tokens": 28740,
+        "input_tokens": 27300,
+        "output_tokens": 1440,
+        "tool_calls": 7
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T09:12:30Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T09:31:10Z",
+      "type": "error",
+      "detail": "During the trials, 5 of 20 runs were invalid (they hit the 60-second run timeout, which the signature does not declare), more than the 10% allowed, after 3 attempts. The invalid outputs are attached to the issue comment."
+    }
+  ],
+  "resolution_note": ""
+}

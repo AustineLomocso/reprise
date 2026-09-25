@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 14,
+  "title": "Discount code WELCOME10 is rejected at checkout",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/14",
+  "provider": "claude",
+  "state": "TRIAGING",
+  "created_at": "2026-09-25T02:10:00Z",
+  "updated_at": "2026-09-25T02:10:25Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": null,
+    "started_at": "2026-09-25T02:10:25Z",
+    "finished_at": null,
+    "duration_ms": null,
+    "fingerprint": null,
+    "duplicate": null,
+    "question": "",
+    "baseline_suite": null,
+    "repro": null,
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": []
+  },
+  "events": [
+    {
+      "at": "2026-09-25T02:10:25Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    }
+  ],
+  "resolution_note": ""
+}

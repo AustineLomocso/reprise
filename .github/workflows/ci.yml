@@ -26,3 +26,9 @@ jobs:
       - run: npm run build
       - name: Committed dist/reprise.mjs matches a fresh build
         run: git diff --exit-code -- dist/
+      - name: Committed sample records match a fresh generation
+        run: |
+          npm run sample
+          git diff --exit-code -- test/fixtures/
+      - name: build-site on the sample records
+        run: node dist/reprise.mjs build-site --data test/fixtures/sample-records --out _site --data-source sample

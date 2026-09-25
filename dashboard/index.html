@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Reprise dashboard: for each bug report, what Reprise proved and how.">
+  <title>Reports · Reprise</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" id="skip-link">Skip to content</a>
+  <div class="wrap">
+    <header class="site-header">
+      <p class="brand"><a href="#/" class="brand-name">Reprise</a> <span class="repo-name" id="repo-name"></span></p>
+      <nav aria-label="Site"><a href="#/how-it-works" id="nav-how">How it works</a></nav>
+    </header>
+    <p class="sample-banner" id="sample-banner" hidden><strong>Sample data.</strong> These reports illustrate how Reprise works; they were not produced by a live run.</p>
+    <main id="main" tabindex="-1">
+      <p class="status-text">Loading reports…</p>
+    </main>
+    <footer class="site-footer" id="site-footer"></footer>
+  </div>
+  <noscript><p class="wrap">This dashboard needs JavaScript to show the reports.</p></noscript>
+  <template id="lifecycle-template">
+  <svg class="lifecycle" viewBox="0 0 800 364" role="img" aria-labelledby="lc-title lc-desc" focusable="false">
+    <title id="lc-title">How a report moves through Reprise</title>
+    <desc id="lc-desc">A new report is checked and gets one of six results: reproduced, reproduced sometimes, duplicate of an earlier report, needs one answer, test environment missing, or Reprise stopped. A reproduced bug can get a fix in progress, which leads to checking the fix; a person can also send their own fix straight to checking. Checking a fix ends in fix verified, still reproduces, or fix breaks other tests. A verified fix that is merged becomes resolved.</desc>
+    <defs><marker id="lc-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="lc-head" d="M0 0 L8 4 L0 8 z"/></marker></defs>
+    <rect class="lc-box" x="8" y="184" width="112" height="32"/><rect class="lc-sw lc-sw-neutral" x="18" y="195" width="10" height="10"/><text class="lc-text" x="36" y="204.5">Checking</text>
+    <rect class="lc-box" x="150" y="24" width="236" height="32"/><rect class="lc-sw lc-sw-reproduced" x="160" y="35" width="10" height="10"/><text class="lc-text" x="178" y="44.5">Reproduced</text>
+    <path class="lc-line" d="M120 200 H135 V40 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="150" y="84" width="236" height="32"/><rect class="lc-sw lc-sw-intermittent" x="160" y="95" width="10" height="10"/><text class="lc-text" x="178" y="104.5">Reproduced sometimes</text>
+    <path class="lc-line" d="M120 200 H135 V100 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="150" y="144" width="236" height="32"/><rect class="lc-sw lc-sw-neutral" x="160" y="155" width="10" height="10"/><text class="lc-text" x="178" y="164.5">Duplicate of an earlier report</text>
+    <path class="lc-line" d="M120 200 H135 V160 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="150" y="204" width="236" height="32"/><rect class="lc-sw lc-sw-neutral" x="160" y="215" width="10" height="10"/><text class="lc-text" x="178" y="224.5">Needs one answer</text>
+    <path class="lc-line" d="M120 200 H135 V220 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="150" y="264" width="236" height="32"/><rect class="lc-sw lc-sw-neutral" x="160" y="275" width="10" height="10"/><text class="lc-text" x="178" y="284.5">Test environment missing</text>
+    <path class="lc-line" d="M120 200 H135 V280 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="150" y="324" width="236" height="32"/><rect class="lc-sw lc-sw-neutral" x="160" y="335" width="10" height="10"/><text class="lc-text" x="178" y="344.5">Reprise stopped — see issue</text>
+    <path class="lc-line" d="M120 200 H135 V340 H146" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="416" y="24" width="150" height="32"/><rect class="lc-sw lc-sw-neutral" x="426" y="35" width="10" height="10"/><text class="lc-text" x="444" y="44.5">Fix in progress</text>
+    <rect class="lc-box" x="416" y="144" width="150" height="32"/><rect class="lc-sw lc-sw-neutral" x="426" y="155" width="10" height="10"/><text class="lc-text" x="444" y="164.5">Checking fix</text>
+    <path class="lc-line" d="M386 40 H412" marker-end="url(#lc-arrow)"/>
+    <path class="lc-line" d="M386 100 H400 V40 H412" marker-end="url(#lc-arrow)"/>
+    <path class="lc-line" d="M491 56 V140" marker-end="url(#lc-arrow)"/>
+    <path class="lc-line lc-dashed" d="M400 100 V160 H412" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="600" y="24" width="196" height="32"/><rect class="lc-sw lc-sw-clean" x="610" y="35" width="10" height="10"/><text class="lc-text" x="628" y="44.5">Resolved</text>
+    <rect class="lc-box" x="600" y="104" width="196" height="32"/><rect class="lc-sw lc-sw-clean" x="610" y="115" width="10" height="10"/><text class="lc-text" x="628" y="124.5">Fix verified</text>
+    <path class="lc-line" d="M566 160 H583 V120 H596" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="600" y="164" width="196" height="32"/><rect class="lc-sw lc-sw-reproduced" x="610" y="175" width="10" height="10"/><text class="lc-text" x="628" y="184.5">Still reproduces</text>
+    <path class="lc-line" d="M566 160 H583 V180 H596" marker-end="url(#lc-arrow)"/>
+    <rect class="lc-box" x="600" y="224" width="196" height="32"/><rect class="lc-sw lc-sw-reproduced" x="610" y="235" width="10" height="10"/><text class="lc-text" x="628" y="244.5">Fix breaks other tests</text>
+    <path class="lc-line" d="M566 160 H583 V240 H596" marker-end="url(#lc-arrow)"/>
+    <path class="lc-line" d="M698 104 V60" marker-end="url(#lc-arrow)"/>
+  </svg>
+  </template>
+</body>
+</html>

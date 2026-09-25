@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 19,
+  "title": "Checkouts of different products occasionally block each other",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/19",
+  "provider": "claude",
+  "state": "FIX_VERIFIED",
+  "created_at": "2026-09-24T17:30:00Z",
+  "updated_at": "2026-09-24T23:55:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "FLAKY",
+    "started_at": "2026-09-24T17:30:20Z",
+    "finished_at": "2026-09-24T17:41:05Z",
+    "duration_ms": 645000,
+    "fingerprint": {
+      "component": "cart",
+      "functions": [
+        "checkout"
+      ],
+      "symptom": "checkout of one product occasionally waits for an unrelated checkout and times out",
+      "trigger": "two checkouts of different products started together",
+      "expected": "both finish in under a second",
+      "actual": "one times out after 5 seconds",
+      "error_signature": "timed out after 5000 ms"
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-19.test.js",
+      "test_sha256": "dd7ca0ac03895c32ce4e58aa9c14cc122264614f528db014b5f3ed23afa10368",
+      "branch": "reprise/repro-19",
+      "signature": {
+        "kind": "timeout",
+        "pattern": "timed out after 5000 ms"
+      },
+      "attempts": 2,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 1,
+      "invalid": 0,
+      "sequence": "PPPPPPPPPPPPFPPPPPPP",
+      "rate": 0.05,
+      "wilson_low": 0.008881448800795402,
+      "wilson_high": 0.23613119344674205
+    },
+    "bisect": {
+      "status": "skipped",
+      "good_sha": "",
+      "first_bad_sha": "",
+      "subject": "",
+      "author": "",
+      "date": "",
+      "url": "",
+      "reason": "bisect is unreliable for intermittent failures"
+    },
+    "root_cause": {
+      "summary": "checkout takes one global lock around every reservation, so a slow reservation of one product blocks checkouts of every other product.",
+      "locations": [
+        {
+          "file": "src/cart.js",
+          "start_line": 8,
+          "end_line": 12,
+          "reason": "a single lock is shared by all SKUs"
+        }
+      ],
+      "fix_direction": "Lock per SKU instead of globally.",
+      "confidence": "medium",
+      "ide_prompt": "Fix GitHub issue #19 in this repository.\nReproduction test: test/reprise/issue-19.test.js (get it with: git checkout origin/reprise/repro-19 -- test/reprise/issue-19.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-19.test.js. It currently fails with: Error: timed out after 5000 ms\nLikely cause: checkout takes one global lock around every reservation, so a slow reservation of one product blocks checkouts of every other product.\nLocations: src/cart.js lines 8–12\nThe first bad commit was not searched: the failure is intermittent.\nRules: do not modify test/reprise/issue-19.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #19\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "bob",
+        "pr": 24,
+        "branch": "reprise/fix-19",
+        "base_sha": "fe50f8d071a0f2d2afbdcf320ea61a67a2c67bc1",
+        "head_sha": "9e46fd23e0acb281f22d49c771e3f5801ebf419a",
+        "bob_iterations": 1,
+        "scope_violations": [],
+        "summary": "Replace the global checkout lock with one lock per SKU.",
+        "verification": {
+          "verdict": "FIX_VERIFIED",
+          "finished_at": "2026-09-24T23:55:00Z",
+          "repro": {
+            "runs_required": 200,
+            "runs": 200,
+            "failed": 0,
+            "invalid": 0,
+            "evidence": "limited",
+            "claim": "200 clean runs rule out failure rates above 1.5%. The bug's triage rate may be as low as 0.9%, so this is limited evidence. Consider more runs with `/reprise verify`.",
+            "injected": false
+          },
+          "regression": {
+            "tests_total": 12,
+            "counts": {
+              "UNCHANGED_PASS": 12,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 0,
+              "ADDED_FAILING": 0,
+              "REMOVED": 0,
+              "REGRESSION": 0
+            },
+            "blocking": [],
+            "notable": []
+          }
+        }
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_061ba52869eda81e96b6",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6340,
+        "input_tokens": 5930,
+        "output_tokens": 410,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_9112dc21a20af0bc7536",
+        "session_costs": 0,
+        "duration_ms": 99000,
+        "total_tokens": 22620,
+        "input_tokens": 20800,
+        "output_tokens": 1820,
+        "tool_calls": 10
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_1c7ddf15532a0a295c5a",
+        "session_costs": 0,
+        "duration_ms": 69000,
+        "total_tokens": 24950,
+        "input_tokens": 23600,
+        "output_tokens": 1350,
+        "tool_calls": 6
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_85edd17ffd126c6c4f77",
+        "session_costs": 0,
+        "duration_ms": 44000,
+        "total_tokens": 16030,
+        "input_tokens": 15200,
+        "output_tokens": 830,
+        "tool_calls": 7
+      },
+      {
+        "stage": "fix",
+        "task_id": "msg_sample_afe465c1c1f42adf08bc",
+        "session_costs": 0,
+        "duration_ms": 143000,
+        "total_tokens": 34150,
+        "input_tokens": 31500,
+        "output_tokens": 2650,
+        "tool_calls": 13
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T17:30:20Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T17:41:05Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 1 of 20 runs (5.0%)."
+    },
+    {
+      "at": "2026-09-24T22:40:00Z",
+      "type": "fix.started",
+      "detail": "/reprise fix from a maintainer."
+    },
+    {
+      "at": "2026-09-24T22:49:00Z",
+      "type": "fix.pr_opened",
+      "detail": "Draft pull request #24."
+    },
+    {
+      "at": "2026-09-24T22:49:05Z",
+      "type": "verify.started",
+      "detail": "Pull request #24."
+    },
+    {
+      "at": "2026-09-24T23:55:00Z",
+      "type": "verify.verdict",
+      "detail": "Fix verified with limited evidence: 200 clean runs (capped)."
+    }
+  ],
+  "resolution_note": ""
+}

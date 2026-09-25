@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 3,
+  "title": "Checkout total is wrong sometimes",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/3",
+  "provider": "claude",
+  "state": "NEEDS_INFO",
+  "created_at": "2026-09-23T08:03:40Z",
+  "updated_at": "2026-09-23T08:05:12Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "NEEDS_INFO",
+    "started_at": "2026-09-23T08:04:00Z",
+    "finished_at": "2026-09-23T08:05:12Z",
+    "duration_ms": 72000,
+    "fingerprint": {
+      "component": "unknown",
+      "functions": [],
+      "symptom": "checkout total is wrong",
+      "trigger": "",
+      "expected": "",
+      "actual": "",
+      "error_signature": ""
+    },
+    "duplicate": null,
+    "question": "Which items and quantities were in the cart, and what total did you expect and what did checkout show?",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": null,
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_2aec6826f4273b9f2699",
+        "session_costs": 0,
+        "duration_ms": 14000,
+        "total_tokens": 4470,
+        "input_tokens": 4210,
+        "output_tokens": 260,
+        "tool_calls": 3
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-23T08:04:00Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-23T08:05:12Z",
+      "type": "triage.verdict",
+      "detail": "The report names no items, quantities or amounts, so no test could be written yet."
+    }
+  ],
+  "resolution_note": ""
+}

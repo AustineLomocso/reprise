@@ -15,7 +15,9 @@
     "build:dev": "node esbuild.config.mjs --dev",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node esbuild.config.mjs --dev && node --test \".build/test/**/*.test.js\""
+    "test": "node esbuild.config.mjs --dev && node --test \".build/test/**/*.test.js\"",
+    "sample": "node esbuild.config.mjs --dev && node scripts/generate-sample-records.mjs",
+    "preview": "node esbuild.config.mjs && node scripts/preview.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

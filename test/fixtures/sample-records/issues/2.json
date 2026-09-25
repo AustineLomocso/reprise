@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 2,
+  "title": "Last item in stock can be sold twice",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/2",
+  "provider": "claude",
+  "state": "FIX_VERIFIED",
+  "created_at": "2026-09-23T08:03:05Z",
+  "updated_at": "2026-09-25T02:48:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "FLAKY",
+    "started_at": "2026-09-23T08:03:30Z",
+    "finished_at": "2026-09-23T08:11:02Z",
+    "duration_ms": 452000,
+    "fingerprint": {
+      "component": "inventory",
+      "functions": [
+        "reserve"
+      ],
+      "symptom": "last unit sold twice, stock goes to -1",
+      "trigger": "two concurrent checkouts of the last unit of one sku",
+      "expected": "second reservation fails",
+      "actual": "both reservations succeed",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-2.test.js",
+      "test_sha256": "8c207c52429ce24a06c3da035f79b3ab46272bd9ed729ed03c1ddceab5b0f0c1",
+      "branch": "reprise/repro-2",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "stock went negative: -1"
+      },
+      "attempts": 2,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 4,
+      "invalid": 0,
+      "sequence": "FPPFPPPPFPPPPPFPPPPP",
+      "rate": 0.2,
+      "wilson_low": 0.08065766257979806,
+      "wilson_high": 0.41601743225189364
+    },
+    "bisect": {
+      "status": "skipped",
+      "good_sha": "",
+      "first_bad_sha": "",
+      "subject": "",
+      "author": "",
+      "date": "",
+      "url": "",
+      "reason": "bisect is unreliable for intermittent failures"
+    },
+    "root_cause": {
+      "summary": "reserve reads the stock with await store.get, checks it, then writes with await store.set; two calls can both read 1 before either writes, so both succeed.",
+      "locations": [
+        {
+          "file": "src/inventory.js",
+          "start_line": 18,
+          "end_line": 27,
+          "reason": "check and decrement are separated by an await"
+        }
+      ],
+      "fix_direction": "Serialise reservations per SKU with a promise-chain lock, or make check-and-set atomic in the store.",
+      "confidence": "high",
+      "ide_prompt": "Fix GitHub issue #2 in this repository.\nReproduction test: test/reprise/issue-2.test.js (get it with: git checkout origin/reprise/repro-2 -- test/reprise/issue-2.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-2.test.js. It currently fails with: AssertionError: stock went negative: -1\nLikely cause: reserve reads the stock with await store.get, checks it, then writes with await store.set; two calls can both read 1 before either writes, so both succeed.\nLocations: src/inventory.js lines 18–27\nThe first bad commit was not searched: the failure is intermittent.\nRules: do not modify test/reprise/issue-2.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #2\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "bob",
+        "pr": 6,
+        "branch": "reprise/fix-2",
+        "base_sha": "34616f3a8cb00a3d870efa25f7a8fcef78ac97b5",
+        "head_sha": "9651bdce95fa6049c909f55cc0dc3c82c3ce4a49",
+        "bob_iterations": 2,
+        "scope_violations": [],
+        "summary": "Serialise reserve() per SKU with a promise-chain lock so the check and the decrement happen together.",
+        "verification": {
+          "verdict": "FIX_VERIFIED",
+          "finished_at": "2026-09-25T02:48:00Z",
+          "repro": {
+            "runs_required": 36,
+            "runs": 36,
+            "failed": 0,
+            "invalid": 0,
+            "evidence": "strong",
+            "claim": "If this bug were still present at its triage rate (at least 8.1%), the chance of 36 clean runs would be below 5%.",
+            "injected": false
+          },
+          "regression": {
+            "tests_total": 13,
+            "counts": {
+              "UNCHANGED_PASS": 12,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 1,
+              "ADDED_FAILING": 0,
+              "REMOVED": 0,
+              "REGRESSION": 0
+            },
+            "blocking": [],
+            "notable": [
+              {
+                "id": "test/inventory.test.js::concurrent reservations never oversell",
+                "class": "ADDED_PASSING"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_93ad6d39c9bcf0c5a735",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6285,
+        "input_tokens": 5890,
+        "output_tokens": 395,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_3f079d0e8664a9af0e28",
+        "session_costs": 0,
+        "duration_ms": 104000,
+        "total_tokens": 23180,
+        "input_tokens": 21300,
+        "output_tokens": 1880,
+        "tool_calls": 11
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_c069392b0884348732d3",
+        "session_costs": 0,
+        "duration_ms": 71000,
+        "total_tokens": 25520,
+        "input_tokens": 24100,
+        "output_tokens": 1420,
+        "tool_calls": 6
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_4bf9175aab56c199845c",
+        "session_costs": 0,
+        "duration_ms": 45000,
+        "total_tokens": 15610,
+        "input_tokens": 14800,
+        "output_tokens": 810,
+        "tool_calls": 7
+      },
+      {
+        "stage": "fix",
+        "task_id": "msg_sample_3461976873a2260e7047",
+        "session_costs": 0,
+        "duration_ms": 141000,
+        "total_tokens": 32500,
+        "input_tokens": 29900,
+        "output_tokens": 2600,
+        "tool_calls": 12
+      },
+      {
+        "stage": "fix",
+        "task_id": "msg_sample_6e7eafbd0675fad813ba",
+        "session_costs": 0,
+        "duration_ms": 98000,
+        "total_tokens": 35700,
+        "input_tokens": 33800,
+        "output_tokens": 1900,
+        "tool_calls": 8
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-23T08:03:30Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-23T08:10:40Z",
+      "type": "rootcause.done",
+      "detail": "High confidence: src/inventory.js lines 18–27."
+    },
+    {
+      "at": "2026-09-23T08:11:02Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 4 of 20 runs (20.0%)."
+    },
+    {
+      "at": "2026-09-25T02:02:00Z",
+      "type": "fix.started",
+      "detail": "/reprise fix from a maintainer."
+    },
+    {
+      "at": "2026-09-25T02:14:00Z",
+      "type": "fix.iteration",
+      "detail": "Round 1: the reproduction test still failed 2 of 10 quick runs."
+    },
+    {
+      "at": "2026-09-25T02:24:00Z",
+      "type": "fix.iteration",
+      "detail": "Round 2: quick check passed."
+    },
+    {
+      "at": "2026-09-25T02:25:00Z",
+      "type": "fix.pr_opened",
+      "detail": "Draft pull request #6."
+    },
+    {
+      "at": "2026-09-25T02:25:04Z",
+      "type": "verify.started",
+      "detail": "Pull request #6."
+    },
+    {
+      "at": "2026-09-25T02:48:00Z",
+      "type": "verify.verdict",
+      "detail": "Fix verified: 36 clean runs, no regressions."
+    }
+  ],
+  "resolution_note": ""
+}

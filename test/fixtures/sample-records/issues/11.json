@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 11,
+  "title": "Checkout sometimes fails with 'store unavailable'",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/11",
+  "provider": "claude",
+  "state": "NEEDS_INFO",
+  "created_at": "2026-09-24T05:40:00Z",
+  "updated_at": "2026-09-24T05:47:15Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "NEEDS_INFO",
+    "started_at": "2026-09-24T05:40:30Z",
+    "finished_at": "2026-09-24T05:47:15Z",
+    "duration_ms": 405000,
+    "fingerprint": {
+      "component": "store",
+      "functions": [
+        "get",
+        "set"
+      ],
+      "symptom": "checkout fails with a store unavailable error",
+      "trigger": "checkout during a busy period",
+      "expected": "order placed",
+      "actual": "error message store unavailable",
+      "error_signature": "StoreUnavailableError: store unavailable"
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "Roughly how many items were in the cart, and were other people checking out at the same moment when you saw the error?",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-11.test.js",
+      "test_sha256": "6b66f1bc39f59713df1dc2e91c93d2feae5ab247ccafa934daea721ced95f5cb",
+      "branch": "reprise/repro-11",
+      "signature": {
+        "kind": "error_type",
+        "pattern": "StoreUnavailableError"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 0,
+      "invalid": 0,
+      "sequence": "PPPPPPPPPPPPPPPPPPPP",
+      "rate": 0,
+      "wilson_low": 0,
+      "wilson_high": 0.16112515805281938
+    },
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_0e094080b790c2d96f20",
+        "session_costs": 0,
+        "duration_ms": 17000,
+        "total_tokens": 5868,
+        "input_tokens": 5480,
+        "output_tokens": 388,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_691792b8e8e477200f5d",
+        "session_costs": 0,
+        "duration_ms": 92000,
+        "total_tokens": 22100,
+        "input_tokens": 20500,
+        "output_tokens": 1600,
+        "tool_calls": 10
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T05:40:30Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T05:47:15Z",
+      "type": "triage.verdict",
+      "detail": "A test that forces the store to time out failed once while it was written, then passed in all 20 trials."
+    }
+  ],
+  "resolution_note": ""
+}

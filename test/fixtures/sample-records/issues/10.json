@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 10,
+  "title": "Stock count shown after checkout is sometimes one too high",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/10",
+  "provider": "claude",
+  "state": "FLAKY",
+  "created_at": "2026-09-24T03:02:00Z",
+  "updated_at": "2026-09-24T03:10:40Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "FLAKY",
+    "started_at": "2026-09-24T03:02:25Z",
+    "finished_at": "2026-09-24T03:10:40Z",
+    "duration_ms": 495000,
+    "fingerprint": {
+      "component": "cart",
+      "functions": [
+        "available"
+      ],
+      "symptom": "stock count on the order summary is sometimes one higher than the real stock",
+      "trigger": "reading available() right after checkout of one unit",
+      "expected": "count reduced by the units just bought",
+      "actual": "count not yet reduced",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-10.test.js",
+      "test_sha256": "de24571cd5f449f1b7ce8a0998d1f46b9c77bb3f14323fbefd2d048a82fae55f",
+      "branch": "reprise/repro-10",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "expected available 4, got 5"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 10,
+      "invalid": 0,
+      "sequence": "PFFPFPPFFPFPPFPFFPPF",
+      "rate": 0.5,
+      "wilson_low": 0.2992980081982123,
+      "wilson_high": 0.7007019918017877
+    },
+    "bisect": {
+      "status": "skipped",
+      "good_sha": "",
+      "first_bad_sha": "",
+      "subject": "",
+      "author": "",
+      "date": "",
+      "url": "",
+      "reason": "bisect is unreliable for intermittent failures"
+    },
+    "root_cause": {
+      "summary": "checkout reads available() for the summary before the reservation write has finished, so the count is sometimes read from before the write.",
+      "locations": [
+        {
+          "file": "src/cart.js",
+          "start_line": 33,
+          "end_line": 36,
+          "reason": "the summary is built without awaiting the reservations"
+        }
+      ],
+      "fix_direction": "Await every reservation before building the order summary.",
+      "confidence": "medium",
+      "ide_prompt": "Fix GitHub issue #10 in this repository.\nReproduction test: test/reprise/issue-10.test.js (get it with: git checkout origin/reprise/repro-10 -- test/reprise/issue-10.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-10.test.js. It currently fails with: AssertionError: expected available 4, got 5\nLikely cause: checkout reads available() for the summary before the reservation write has finished, so the count is sometimes read from before the write.\nLocations: src/cart.js lines 33–36\nThe first bad commit was not searched: the failure is intermittent.\nRules: do not modify test/reprise/issue-10.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #10\"."
+    }
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_9f682c82655067cd0f54",
+        "session_costs": 0,
+        "duration_ms": 18000,
+        "total_tokens": 6122,
+        "input_tokens": 5720,
+        "output_tokens": 402,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_cda8b566dcde87b847b5",
+        "session_costs": 0,
+        "duration_ms": 97000,
+        "total_tokens": 21520,
+        "input_tokens": 19800,
+        "output_tokens": 1720,
+        "tool_calls": 10
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_db1aca6f4c4e069eeb27",
+        "session_costs": 0,
+        "duration_ms": 42000,
+        "total_tokens": 14860,
+        "input_tokens": 14100,
+        "output_tokens": 760,
+        "tool_calls": 7
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T03:02:25Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T03:10:20Z",
+      "type": "rootcause.done",
+      "detail": "Medium confidence: src/cart.js lines 33–36."
+    },
+    {
+      "at": "2026-09-24T03:10:40Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 10 of 20 runs (50.0%)."
+    }
+  ],
+  "resolution_note": ""
+}

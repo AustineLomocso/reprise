@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 1,
+  "title": "Bulk discount not applied when buying exactly 10 units",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/1",
+  "provider": "claude",
+  "state": "RESOLVED",
+  "created_at": "2026-09-23T08:02:11Z",
+  "updated_at": "2026-09-23T11:40:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "CONFIRMED",
+    "started_at": "2026-09-23T08:02:40Z",
+    "finished_at": "2026-09-23T08:09:52Z",
+    "duration_ms": 432000,
+    "fingerprint": {
+      "component": "pricing",
+      "functions": [
+        "applyBulkDiscount"
+      ],
+      "symptom": "bulk discount not applied at quantity 10",
+      "trigger": "cart with exactly 10 units of one sku",
+      "expected": "10% discount applied, 2250.00 before shipping",
+      "actual": "full price charged, 2500.00",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-1.test.js",
+      "test_sha256": "d8144beb8f5b1d5edf6e4b9f1113e24b02164265b8959dabfa2c9174a1e8ce8b",
+      "branch": "reprise/repro-1",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "250000 !== 225000"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 20,
+      "invalid": 0,
+      "sequence": "FFFFFFFFFFFFFFFFFFFF",
+      "rate": 1,
+      "wilson_low": 0.8388748419471806,
+      "wilson_high": 1
+    },
+    "bisect": {
+      "status": "found",
+      "good_sha": "6953d1a5456b05eddf48bb7aad0ffbb15fa2a940",
+      "first_bad_sha": "60f1ce120e547a88f2927db5454e66348b42e2fc",
+      "subject": "refactor: move pricing thresholds into named constants",
+      "author": "demo-shop maintainer",
+      "date": "2026-09-22T14:20:00Z",
+      "url": "https://github.com/AustineLomocso/reprise-demo-shop/commit/60f1ce120e547a88f2927db5454e66348b42e2fc",
+      "reason": ""
+    },
+    "root_cause": {
+      "summary": "applyBulkDiscount compares qty > BULK_MIN_QTY, so an order of exactly 10 units never qualifies for the discount.",
+      "locations": [
+        {
+          "file": "src/pricing.js",
+          "start_line": 12,
+          "end_line": 14,
+          "reason": "the comparison excludes the threshold itself"
+        }
+      ],
+      "fix_direction": "Compare with >= against BULK_MIN_QTY.",
+      "confidence": "high",
+      "ide_prompt": "Fix GitHub issue #1 in this repository.\nReproduction test: test/reprise/issue-1.test.js (get it with: git checkout origin/reprise/repro-1 -- test/reprise/issue-1.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-1.test.js. It currently fails with: Expected values to be strictly equal: 250000 !== 225000\nLikely cause: applyBulkDiscount compares qty > BULK_MIN_QTY, so an order of exactly 10 units never qualifies for the discount.\nLocations: src/pricing.js lines 12–14\nIntroduced in 60f1ce1 (refactor: move pricing thresholds into named constants).\nRules: do not modify test/reprise/issue-1.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #1\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "bob",
+        "pr": 5,
+        "branch": "reprise/fix-1",
+        "base_sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+        "head_sha": "9ee844a9bec46072d1bac161a241c577505ce3c8",
+        "bob_iterations": 1,
+        "scope_violations": [],
+        "summary": "Use >= when comparing the quantity with BULK_MIN_QTY in applyBulkDiscount.",
+        "verification": {
+          "verdict": "FIX_VERIFIED",
+          "finished_at": "2026-09-23T10:31:00Z",
+          "repro": {
+            "runs_required": 3,
+            "runs": 3,
+            "failed": 0,
+            "invalid": 0,
+            "evidence": "strong",
+            "claim": "If this bug were still present at its triage rate (at least 83.9%), the chance of 3 clean runs would be below 5%.",
+            "injected": false
+          },
+          "regression": {
+            "tests_total": 12,
+            "counts": {
+              "UNCHANGED_PASS": 12,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 0,
+              "ADDED_FAILING": 0,
+              "REMOVED": 0,
+              "REGRESSION": 0
+            },
+            "blocking": [],
+            "notable": []
+          }
+        }
+      },
+      {
+        "n": 2,
+        "source": "human",
+        "pr": 7,
+        "branch": "demo/bad-fix-bulk",
+        "base_sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+        "head_sha": "d95ce2c33e623c7ae436f01acec6a3b250a854c6",
+        "bob_iterations": 0,
+        "scope_violations": [],
+        "summary": "Lower BULK_MIN_QTY to 9 so ten units always qualify.",
+        "verification": {
+          "verdict": "REGRESSION_DETECTED",
+          "finished_at": "2026-09-23T11:05:00Z",
+          "repro": {
+            "runs_required": 3,
+            "runs": 3,
+            "failed": 0,
+            "invalid": 0,
+            "evidence": "strong",
+            "claim": "If this bug were still present at its triage rate (at least 83.9%), the chance of 3 clean runs would be below 5%.",
+            "injected": true
+          },
+          "regression": {
+            "tests_total": 12,
+            "counts": {
+              "UNCHANGED_PASS": 11,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 0,
+              "ADDED_FAILING": 0,
+              "REMOVED": 0,
+              "REGRESSION": 1
+            },
+            "blocking": [
+              {
+                "id": "test/pricing.test.js::no bulk discount for 9 units",
+                "class": "REGRESSION",
+                "base": "4/4 pass",
+                "head": "0/4 pass",
+                "message": "Expected values to be strictly equal: 202500 !== 225000"
+              }
+            ],
+            "notable": []
+          }
+        }
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_59cf23a8c9f7b8c9d108",
+        "session_costs": 0,
+        "duration_ms": 21000,
+        "total_tokens": 6530,
+        "input_tokens": 6120,
+        "output_tokens": 410,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_135dd64262f31fe0b5e1",
+        "session_costs": 0,
+        "duration_ms": 96000,
+        "total_tokens": 20050,
+        "input_tokens": 18400,
+        "output_tokens": 1650,
+        "tool_calls": 9
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_544d13e1b61e9a797a04",
+        "session_costs": 0,
+        "duration_ms": 41000,
+        "total_tokens": 13620,
+        "input_tokens": 12900,
+        "output_tokens": 720,
+        "tool_calls": 6
+      },
+      {
+        "stage": "fix",
+        "task_id": "msg_sample_603d7eaa36f5969534e3",
+        "session_costs": 0,
+        "duration_ms": 150000,
+        "total_tokens": 34100,
+        "input_tokens": 31200,
+        "output_tokens": 2900,
+        "tool_calls": 14
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-23T08:02:40Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-23T08:08:10Z",
+      "type": "bisect.done",
+      "detail": "First bad commit 60f1ce1: refactor: move pricing thresholds into named constants"
+    },
+    {
+      "at": "2026-09-23T08:09:30Z",
+      "type": "rootcause.done",
+      "detail": "High confidence: src/pricing.js lines 12–14."
+    },
+    {
+      "at": "2026-09-23T08:09:52Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 20 of 20 runs."
+    },
+    {
+      "at": "2026-09-23T10:12:00Z",
+      "type": "fix.started",
+      "detail": "/reprise fix from a maintainer."
+    },
+    {
+      "at": "2026-09-23T10:20:00Z",
+      "type": "fix.iteration",
+      "detail": "Round 1: quick check passed."
+    },
+    {
+      "at": "2026-09-23T10:21:00Z",
+      "type": "fix.pr_opened",
+      "detail": "Draft pull request #5."
+    },
+    {
+      "at": "2026-09-23T10:21:05Z",
+      "type": "verify.started",
+      "detail": "Pull request #5."
+    },
+    {
+      "at": "2026-09-23T10:31:00Z",
+      "type": "verify.verdict",
+      "detail": "Fix verified: 3 clean runs, no regressions."
+    },
+    {
+      "at": "2026-09-23T10:58:00Z",
+      "type": "verify.started",
+      "detail": "Pull request #7."
+    },
+    {
+      "at": "2026-09-23T11:05:00Z",
+      "type": "verify.verdict",
+      "detail": "Fix breaks other tests: test/pricing.test.js::no bulk discount for 9 units."
+    },
+    {
+      "at": "2026-09-23T11:40:00Z",
+      "type": "resolved",
+      "detail": "Pull request #5 merged and the issue closed."
+    }
+  ],
+  "resolution_note": ""
+}

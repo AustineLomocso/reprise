@@ -195,3 +195,41 @@ Deviations and decisions:
 - `rootcause.confidence` is a free string: the spec shows only the value `"high"` and defines no enumeration.
 - The site-index example uses `""` placeholders for `state`, `verdict` and `updated_at`; the schema test fills them in rather than weakening the schema.
 - `sandbox.dockerfile` and `version` are the only required config keys; `architecture.md` marks the Dockerfile "required" and gives defaults for everything else.
+
+## Step 2 — phase 6 dashboard (plan)
+
+- `src/triage/dedupe-score.ts`: pure implementation of `triage-pipeline.md` §3 (normalisation, Jaccard, weights, renormalisation over counted fields, threshold 0.60), unit-tested. Used only by the sample generator in this slice.
+- `src/site/`: `build-site` reads `DATA/issues/*.json`, validates each against the schema (file name must match `issue`), fails listing every invalid record, replaces `OUT`, copies `dashboard/`, copies records to `OUT/data/issues/`, writes `OUT/data/index.json` (site-index schema, validated before writing).
+- `dashboard/`: `index.html` (CSP meta exactly as specified, `lang="en"`), `app.js` (ES module, hash router, `textContent` only), `styles.css`, `fonts/` (IBM Plex Sans 400/600 and Mono 400 woff2 from `IBM/plex` at commit `763c36e`, with `LICENSE.txt`).
+- `scripts/generate-sample-records.mjs` + `npm run sample`: 17 records covering every listed state, statistics from the compiled `src/stats`, duplicate score from `src/triage/dedupe-score.ts`, schema-validated, written to `test/fixtures/sample-records/issues/`. CI checks the committed records match a fresh generation.
+- `scripts/preview.mjs` + `npm run preview`: build from the sample records into `.preview/` and serve with `node:http`.
+- Tests: dedupe scoring; build-site (index, medians only over records that have the value, failing build on an invalid record, data_source); every sample record validates and every required state is covered; dashboard safety (no `innerHTML`-family APIs, exact CSP, no external URLs); S7 fixture.
+- Browser review with Playwright at 360, 768, 1440 px, light and dark, keyboard-only, reduced motion, console and CSP; findings into `05-quality/ui-review.md`.
+
+Contrast check done before writing CSS (WCAG formula over the spec palette): every text colour passes AA except light "intermittent" `#9A6A00` on Mist at 4.32:1, so it is used only for graphics (non-text minimum 3:1). Rule `#C9D3D0` is 1.40:1 on Mist, so invalid trial cells carry an ink hatch to stay visible.
+
+## Step 2 — report
+
+Built:
+- `src/triage/dedupe-score.ts`: `normalise`, `jaccard`, `scoreFingerprints`, `isCandidate` (threshold compared with a 1e-9 tolerance so an exact 0.60 is a candidate despite float error).
+- `src/site/build-site.ts` and `src/site/command.ts`: record loading with per-file schema validation (every problem listed, nothing written on failure), file name must equal `issue`, one repository per site (from the records, else `GITHUB_REPOSITORY`), index generation, output directory guard (refuses to replace a folder containing the data, the dashboard sources or the working directory).
+- `dashboard/`: `index.html` (exact CSP, `lang="en"`, hand-drawn lifecycle SVG in a `<template>`), `app.js` (router, views, trial strip), `format.js` (display names and pure formatting, imported by the tests), `styles.css`, `favicon.svg`, `fonts/` (IBM Plex Sans 400 and 600, Mono 400, from `IBM/plex` commit `763c36e`, with `LICENSE.txt`).
+- `scripts/generate-sample-records.mjs`: 17 records (#1–4 BULK, RACE, VAGUE, DUP; #9–21 the other states) plus the S7 record in `test/fixtures/security/`. Every statistic is computed by the compiled `src/stats`; the duplicate score by `src/triage/dedupe-score.ts`; the `BLOCKED_ENV` text by the real config schema. The script also checks: verification run counts equal `requiredRuns`, verdict precedence, blocking lists name every blocking test, `tests_total` equals the class counts, PR numbers never collide with issue numbers, every required state is present, and only #4 vs #1 reaches the dedupe threshold (this check caught VAGUE matching #13 at 0.625; VAGUE's component is now `unknown`, which is what intake would give such a report).
+- `scripts/preview.mjs`: builds with the real CLI into `.preview/<port>/` and serves with `node:http`.
+- Tests (79 in total, all passing): dedupe scoring (normalisation, renormalisation, weights, exact 0.60 edge); build-site (median, medians only over records that have the value, Bobcoin median only for `bob` records, sample index, verbatim copy, invalid record fails with nothing written, empty site, two repositories, output guard, CLI default `live`); sample records (schema, coverage of every state named in the brief, triage statistics, run counts, evidence and claims recomputed from `src/stats`, duplicate score recomputed); dashboard (exact CSP, no HTML-parsing DOM APIs or inline handlers or `.style`, no inline script or style, no external URLs, display names parsed from `dashboard.md`, exact empty/error/unknown copy, formatting parity with `src/stats`, strip summaries, S7 record reaches the site unchanged).
+- CI now also regenerates the sample records and fails on any diff, and runs `build-site` on them.
+- `README.md` for the engine.
+
+Commands and results:
+- `npm run sample`: "Wrote 17 sample records … and 1 security record".
+- `npx tsc --noEmit -p .`: clean. `npm test`: 79 pass.
+- Browser review: see `05-quality/ui-review.md` (14 findings, all resolved; checks table). CSP: 0 violations over 21 routes. Console: 0 errors. Lighthouse accessibility 100 on five routes (`npx -y lighthouse@13.5.0`, not added to `package.json`).
+
+Key numbers in the sample set (all from `src/stats`): RACE 4/20, Wilson 8.1%–41.6%, 36 runs required, strong claim; #19 1/20, 200 runs (capped), limited claim with 1.5% against 0.9%; #11 zero failures in 20, bound 13.9%; DUP match score 0.69 (component 1.00, functions 1.00, symptom 0.08, trigger 0.50, error not compared).
+
+Deviations and open questions (also written into the specs, marked for owner review):
+1. `dashboard.md` "Implementation decisions from the web-only slice": the large strip is one tab stop with arrow keys (a `role="img"` element cannot contain focusable cells); the mini strip has the summary only (no per-cell tooltips or hidden list); below 40 rem the Trials column folds under the result; fix source shown as "Proposed by Reprise" / "Written by a person"; `RESOLVED` uses the neutral mark; the rule for the latest pair.
+2. `data-contracts.md`: the three extra nullable points from step 1 are now written into "Absent and null values", pending your review.
+3. `fixes_verified` counts verifications with verdict `FIX_VERIFIED` (by analogy with the defined `regressions_caught`); the spec does not define it. The sample set shows 3 (BULK's first attempt, RACE, #19).
+4. The "How it works" copy is new text written from the specs (20 trials, no network, statistical verification); no numbers beyond the kit's defaults.
+5. The engine repository has no licence file. The kit does not name one; tell me if you want one (for example MIT) before the site goes live.

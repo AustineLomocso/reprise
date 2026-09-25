@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 18,
+  "title": "Out-of-stock message names the wrong product",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/18",
+  "provider": "claude",
+  "state": "REGRESSION_DETECTED",
+  "created_at": "2026-09-24T14:10:00Z",
+  "updated_at": "2026-09-24T21:15:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "CONFIRMED",
+    "started_at": "2026-09-24T14:10:10Z",
+    "finished_at": "2026-09-24T14:16:20Z",
+    "duration_ms": 370000,
+    "fingerprint": {
+      "component": "inventory",
+      "functions": [
+        "outOfStockMessage"
+      ],
+      "symptom": "out of stock message names a different product",
+      "trigger": "checkout where the second line is out of stock",
+      "expected": "message names the out of stock product",
+      "actual": "message names the first product in the cart",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-18.test.js",
+      "test_sha256": "2804f75eabcec1d82c46bb12cfa88f616efa02caeb02bf9f98b2d980a64f6da1",
+      "branch": "reprise/repro-18",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "'MUG-01' !== 'LAMP-02'"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 20,
+      "invalid": 0,
+      "sequence": "FFFFFFFFFFFFFFFFFFFF",
+      "rate": 1,
+      "wilson_low": 0.8388748419471806,
+      "wilson_high": 1
+    },
+    "bisect": {
+      "status": "found",
+      "good_sha": "6953d1a5456b05eddf48bb7aad0ffbb15fa2a940",
+      "first_bad_sha": "8470f23aadc71a03e00717175a24dd9c0ff634fb",
+      "subject": "feat: friendlier out-of-stock messages",
+      "author": "demo-shop maintainer",
+      "date": "2026-09-23T12:00:00Z",
+      "url": "https://github.com/AustineLomocso/reprise-demo-shop/commit/8470f23aadc71a03e00717175a24dd9c0ff634fb",
+      "reason": ""
+    },
+    "root_cause": {
+      "summary": "outOfStockMessage is called with lines[0] instead of the line whose reservation failed.",
+      "locations": [
+        {
+          "file": "src/inventory.js",
+          "start_line": 41,
+          "end_line": 44,
+          "reason": "the index of the failing line is not passed on"
+        }
+      ],
+      "fix_direction": "Pass the failing line to outOfStockMessage.",
+      "confidence": "high",
+      "ide_prompt": "Fix GitHub issue #18 in this repository.\nReproduction test: test/reprise/issue-18.test.js (get it with: git checkout origin/reprise/repro-18 -- test/reprise/issue-18.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-18.test.js. It currently fails with: Expected values to be strictly equal: 'MUG-01' !== 'LAMP-02'\nLikely cause: outOfStockMessage is called with lines[0] instead of the line whose reservation failed.\nLocations: src/inventory.js lines 41–44\nIntroduced in 8470f23 (feat: friendlier out-of-stock messages).\nRules: do not modify test/reprise/issue-18.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #18\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "human",
+        "pr": 23,
+        "branch": "fix-oos-message",
+        "base_sha": "fe50f8d071a0f2d2afbdcf320ea61a67a2c67bc1",
+        "head_sha": "3f6c97ee0357cc87ae60fa009236965701c10ae8",
+        "bob_iterations": 0,
+        "scope_violations": [],
+        "summary": "Look up the failing line before building the message.",
+        "verification": {
+          "verdict": "REGRESSION_DETECTED",
+          "finished_at": "2026-09-24T21:15:00Z",
+          "repro": {
+            "runs_required": 3,
+            "runs": 3,
+            "failed": 0,
+            "invalid": 0,
+            "evidence": "strong",
+            "claim": "If this bug were still present at its triage rate (at least 83.9%), the chance of 3 clean runs would be below 5%.",
+            "injected": false
+          },
+          "regression": {
+            "tests_total": 12,
+            "counts": {
+              "UNCHANGED_PASS": 10,
+              "NEWLY_PASSING": 0,
+              "PRE_EXISTING_FAILURE": 0,
+              "PRE_EXISTING_FLAKY": 0,
+              "ADDED_PASSING": 0,
+              "ADDED_FAILING": 0,
+              "REMOVED": 1,
+              "REGRESSION": 1
+            },
+            "blocking": [
+              {
+                "id": "test/cart.test.js::checkout fails cleanly when out of stock",
+                "class": "REGRESSION",
+                "base": "4/4 pass",
+                "head": "0/4 pass",
+                "message": "TypeError: Cannot read properties of undefined (reading 'sku')"
+              },
+              {
+                "id": "test/inventory.test.js::reservation larger than stock fails",
+                "class": "REMOVED",
+                "base": "4/4 pass",
+                "head": "not present",
+                "message": "The test was deleted in this pull request."
+              }
+            ],
+            "notable": []
+          }
+        }
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_a575ced59e45d59f7c96",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6200,
+        "input_tokens": 5800,
+        "output_tokens": 400,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_d2b19ef19ce0e24d5f6b",
+        "session_costs": 0,
+        "duration_ms": 90000,
+        "total_tokens": 19600,
+        "input_tokens": 18000,
+        "output_tokens": 1600,
+        "tool_calls": 9
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_d914d3dcaa27180a5b0e",
+        "session_costs": 0,
+        "duration_ms": 40000,
+        "total_tokens": 13700,
+        "input_tokens": 13000,
+        "output_tokens": 700,
+        "tool_calls": 6
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-24T14:10:10Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-24T14:16:20Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 20 of 20 runs."
+    },
+    {
+      "at": "2026-09-24T21:02:00Z",
+      "type": "verify.started",
+      "detail": "Pull request #23."
+    },
+    {
+      "at": "2026-09-24T21:15:00Z",
+      "type": "verify.verdict",
+      "detail": "Fix breaks other tests: one test now fails and one was removed."
+    }
+  ],
+  "resolution_note": ""
+}

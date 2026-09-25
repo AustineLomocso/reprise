@@ -1,0 +1,882 @@
+/* Reprise dashboard. Design plan: docs/kit/02-specs/dashboard.md.
+   A reproduction lab: the trial strip is the one memorable element; everything else stays quiet.
+   Borders encode structure. No shadows, no gradient washes, no rounded cards. One accent (signal blue)
+   for things you can click or focus. Motion: transform and opacity only, ease-out, under 300 ms. */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/IBMPlexSans-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: light dark;
+  --mist: #F2F5F4;
+  --ink: #1B2733;
+  --rule: #C9D3D0;
+  --reproduced: #B3261E;
+  --clean: #2E6B4F;
+  --intermittent: #9A6A00;
+  --signal: #2F4FA8;
+
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.563rem;
+  --step-3: 1.953rem;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mist: #16212B;
+    --ink: #E4ECEA;
+    --rule: #34454F;
+    --reproduced: #F2837B;
+    --clean: #7CC8A1;
+    --intermittent: #E0B54D;
+    --signal: #9DB3F2;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--mist);
+}
+
+body {
+  margin: 0;
+  background: var(--mist);
+  color: var(--ink);
+  font-size: var(--step-0);
+  font-weight: 400;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+
+.wrap {
+  max-width: 72rem;
+  margin-left: clamp(1rem, 7vw, 8rem);
+  margin-right: 1rem;
+}
+
+p,
+li,
+dd,
+figcaption {
+  max-width: 72ch;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--step-2);
+}
+
+h2 {
+  font-size: var(--step-1);
+}
+
+h3 {
+  font-size: var(--step-0);
+}
+
+@media (min-width: 48rem) {
+  h1 {
+    font-size: var(--step-3);
+  }
+}
+
+strong {
+  font-weight: 600;
+}
+
+code,
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: var(--step--1);
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: var(--signal);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link: visible only when focused. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--mist);
+  border: 1px solid var(--signal);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skip-link:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Header */
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  padding: 1.25rem 0 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.brand {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+}
+
+.brand-name {
+  font-size: var(--step-1);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .brand-name:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+
+.site-header nav a {
+  font-size: var(--step-0);
+}
+
+/* Sample-data banner (ADR-13): persistent, plain words. */
+.sample-banner {
+  margin: 1rem 0 0;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--ink);
+  border-left-width: 4px;
+  max-width: none;
+}
+
+.sample-banner[hidden] {
+  display: none;
+}
+
+main {
+  padding: 2rem 0 3rem;
+}
+
+main:focus {
+  outline: none;
+}
+
+.site-footer {
+  border-top: 1px solid var(--rule);
+  padding: 1rem 0 2rem;
+  font-size: var(--step--1);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.status-text {
+  margin: 0;
+}
+
+/* Buttons */
+
+.button {
+  font: inherit;
+  color: var(--signal);
+  background: transparent;
+  border: 1px solid var(--signal);
+  border-radius: 0;
+  padding: 0.375rem 0.875rem;
+  cursor: pointer;
+  transition: transform 100ms var(--ease-out);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    border-width: 1px;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* Result marker: shape and colour for a state; the words always sit next to it. */
+
+.result {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.swatch {
+  flex: none;
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--ink);
+  transform: translateY(0.05rem);
+}
+
+.tone-reproduced .swatch {
+  background: var(--reproduced);
+  border-color: var(--reproduced);
+}
+
+.tone-intermittent .swatch {
+  background: var(--intermittent);
+  border-color: var(--intermittent);
+}
+
+.tone-clean .swatch {
+  border-color: var(--clean);
+}
+
+/* Trial strip */
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.strip--large {
+  gap: 3px;
+  width: fit-content;
+  /* 40 cells of 14 px with 3 px gaps: wraps after 40. */
+  max-width: calc(40 * 14px + 39 * 3px);
+}
+
+.strip--mini {
+  gap: 2px;
+  width: calc(20 * 5px + 19 * 2px);
+}
+
+.cell {
+  position: relative;
+  flex: none;
+}
+
+.strip--large .cell {
+  width: 14px;
+  height: 28px;
+}
+
+.strip--mini .cell {
+  width: 5px;
+  height: 12px;
+}
+
+.cell--F {
+  background: var(--reproduced);
+}
+
+.cell--P {
+  border: 2px solid var(--clean);
+}
+
+.strip--mini .cell--P {
+  border-width: 1px;
+}
+
+/* Invalid: rule colour with a diagonal hatch in ink, so it stays visible against the page. */
+.cell--X {
+  background-color: var(--rule);
+  background-image: repeating-linear-gradient(135deg, var(--ink) 0 1.5px, transparent 1.5px 5px);
+}
+
+.strip[tabindex="0"] {
+  cursor: default;
+}
+
+.strip:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+
+.strip:focus-visible .cell.is-active {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .strip--large .cell:hover {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+}
+
+/* The one orchestrated moment: cells enter in run order, 30 ms apart, 180 ms each. */
+@keyframes cell-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.strip--enter .cell {
+  animation: cell-enter 180ms var(--ease-out) both;
+}
+
+/* Tooltip: opens from the cell edge it is attached to (origin-aware). */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  z-index: 3;
+  padding: 0.25rem 0.5rem;
+  background: var(--ink);
+  color: var(--mist);
+  font-size: var(--step--1);
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 120ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.tooltip--center {
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  transform-origin: 50% 100%;
+}
+
+.tooltip--start {
+  left: 0;
+  transform: scale(0.95);
+  transform-origin: 0 100%;
+}
+
+.tooltip--end {
+  right: 0;
+  transform: scale(0.95);
+  transform-origin: 100% 100%;
+}
+
+.tooltip.is-open {
+  opacity: 1;
+}
+
+.tooltip--center.is-open {
+  transform: translateX(-50%) scale(1);
+}
+
+.tooltip--start.is-open,
+.tooltip--end.is-open {
+  transform: scale(1);
+}
+
+/* Nothing animates for keyboard-triggered actions. */
+html[data-modality="keyboard"] .tooltip,
+html[data-modality="keyboard"] .button {
+  transition: none;
+}
+
+html[data-modality="keyboard"] .button:active {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip--enter .cell {
+    animation: none;
+  }
+
+  .tooltip,
+  .button {
+    transition: none;
+  }
+
+  .button:active {
+    transform: none;
+  }
+}
+
+/* Overview */
+
+.latest {
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.latest-title {
+  font-size: var(--step-1);
+  margin-bottom: 1.25rem;
+}
+
+.latest-title .label {
+  font-weight: 400;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem 1.25rem;
+  align-items: center;
+  margin: 0;
+}
+
+.pair dt {
+  font-weight: 600;
+}
+
+.pair .strip-figure {
+  margin: 0;
+  padding-top: 0;
+}
+
+.pair dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  max-width: none;
+}
+
+.count {
+  white-space: nowrap;
+}
+
+.reports {
+  padding-top: 2.5rem;
+}
+
+.reports h2 {
+  margin-bottom: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.625rem 1rem 0.625rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+th:last-child,
+td:last-child {
+  padding-right: 0;
+}
+
+thead th {
+  font-size: var(--step--1);
+  font-weight: 600;
+  border-bottom-color: var(--ink);
+}
+
+.report-table .col-num {
+  width: 3rem;
+  white-space: nowrap;
+}
+
+.report-table .col-trials {
+  width: calc(20 * 5px + 19 * 2px);
+}
+
+.report-table td.col-trials {
+  padding-top: 0.95rem;
+}
+
+.report-table .col-result {
+  width: 13rem;
+}
+
+.none {
+  display: inline-block;
+}
+
+.narrow-only {
+  display: none;
+}
+
+.totals {
+  margin: 1.5rem 0 0;
+  font-size: var(--step--1);
+  max-width: none;
+}
+
+@media (max-width: 40rem) {
+  th,
+  td {
+    padding-right: 0.625rem;
+  }
+
+  .report-table .col-num {
+    width: 2.25rem;
+  }
+
+  .report-table .col-result {
+    width: auto;
+  }
+
+  /* The Trials column folds under the result on narrow screens. */
+  .report-table .col-trials {
+    display: none;
+  }
+
+  .narrow-only {
+    display: block;
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  /* Two rows of ten. */
+  .narrow-only .strip--mini {
+    width: calc(10 * 5px + 9 * 2px);
+  }
+}
+
+/* Issue detail */
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+}
+
+.detail-head h1 {
+  max-width: 40ch;
+}
+
+.detail-head .result {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.byline {
+  margin: 0.5rem 0 0;
+}
+
+.note {
+  margin: 1rem 0 0;
+  padding-left: 0.875rem;
+  border-left: 4px solid var(--ink);
+}
+
+.detail section {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.detail section > h2 {
+  margin-bottom: 1rem;
+}
+
+.detail section h3 {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.strip-figure {
+  margin: 0 0 1rem;
+  padding-top: 1.75rem; /* room for tooltips above the first row */
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
+  gap: 0.375rem 1.25rem;
+  margin: 1rem 0 0;
+}
+
+.facts dt {
+  font-weight: 600;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+@media (max-width: 30rem) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.125rem;
+  }
+
+  .facts dd {
+    margin-bottom: 0.625rem;
+  }
+}
+
+.plain-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.plain-list li + li {
+  margin-top: 0.375rem;
+}
+
+.small-table {
+  width: auto;
+  min-width: min(100%, 28rem);
+  margin-top: 1rem;
+}
+
+.small-table td.num,
+.small-table th.num {
+  text-align: right;
+}
+
+.iteration + .iteration {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--rule);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  max-width: none;
+}
+
+.timeline time {
+  white-space: nowrap;
+}
+
+.timeline .what {
+  font-weight: 600;
+}
+
+@media (max-width: 30rem) {
+  .timeline li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* How it works */
+
+.steps {
+  margin: 1.5rem 0 0;
+  padding-left: 1.5rem;
+}
+
+.steps > li {
+  padding-left: 0.25rem;
+}
+
+.steps > li + li {
+  margin-top: 1.5rem;
+}
+
+.steps h2 {
+  font-size: var(--step-1);
+}
+
+.steps p {
+  margin: 0.375rem 0 0;
+}
+
+.lifecycle-figure {
+  margin: 2.5rem 0 0;
+}
+
+.lifecycle-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  padding: 1rem;
+}
+
+.lifecycle {
+  display: block;
+  width: 100%;
+  min-width: 40rem;
+  max-width: 56rem;
+  height: auto;
+  color: var(--ink);
+}
+
+.lifecycle .lc-box {
+  fill: var(--mist);
+  stroke: var(--ink);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+}
+
+.lifecycle .lc-text {
+  fill: var(--ink);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.lifecycle .lc-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+
+.lifecycle .lc-dashed {
+  stroke-dasharray: 4 3;
+}
+
+.lifecycle .lc-head {
+  fill: var(--ink);
+}
+
+.lifecycle .lc-sw-reproduced {
+  fill: var(--reproduced);
+}
+
+.lifecycle .lc-sw-intermittent {
+  fill: var(--intermittent);
+}
+
+.lifecycle .lc-sw-clean {
+  fill: none;
+  stroke: var(--clean);
+  stroke-width: 2;
+}
+
+.lifecycle .lc-sw-neutral {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.lifecycle-figure figcaption {
+  margin-top: 0.75rem;
+  font-size: var(--step--1);
+}
+
+/* Stagger delays for the strip entrance (cells 2 to 40; later cells share the last delay). */
+.strip--enter .cell:nth-child(2) { animation-delay: 30ms; }
+.strip--enter .cell:nth-child(3) { animation-delay: 60ms; }
+.strip--enter .cell:nth-child(4) { animation-delay: 90ms; }
+.strip--enter .cell:nth-child(5) { animation-delay: 120ms; }
+.strip--enter .cell:nth-child(6) { animation-delay: 150ms; }
+.strip--enter .cell:nth-child(7) { animation-delay: 180ms; }
+.strip--enter .cell:nth-child(8) { animation-delay: 210ms; }
+.strip--enter .cell:nth-child(9) { animation-delay: 240ms; }
+.strip--enter .cell:nth-child(10) { animation-delay: 270ms; }
+.strip--enter .cell:nth-child(11) { animation-delay: 300ms; }
+.strip--enter .cell:nth-child(12) { animation-delay: 330ms; }
+.strip--enter .cell:nth-child(13) { animation-delay: 360ms; }
+.strip--enter .cell:nth-child(14) { animation-delay: 390ms; }
+.strip--enter .cell:nth-child(15) { animation-delay: 420ms; }
+.strip--enter .cell:nth-child(16) { animation-delay: 450ms; }
+.strip--enter .cell:nth-child(17) { animation-delay: 480ms; }
+.strip--enter .cell:nth-child(18) { animation-delay: 510ms; }
+.strip--enter .cell:nth-child(19) { animation-delay: 540ms; }
+.strip--enter .cell:nth-child(20) { animation-delay: 570ms; }
+.strip--enter .cell:nth-child(21) { animation-delay: 600ms; }
+.strip--enter .cell:nth-child(22) { animation-delay: 630ms; }
+.strip--enter .cell:nth-child(23) { animation-delay: 660ms; }
+.strip--enter .cell:nth-child(24) { animation-delay: 690ms; }
+.strip--enter .cell:nth-child(25) { animation-delay: 720ms; }
+.strip--enter .cell:nth-child(26) { animation-delay: 750ms; }
+.strip--enter .cell:nth-child(27) { animation-delay: 780ms; }
+.strip--enter .cell:nth-child(28) { animation-delay: 810ms; }
+.strip--enter .cell:nth-child(29) { animation-delay: 840ms; }
+.strip--enter .cell:nth-child(30) { animation-delay: 870ms; }
+.strip--enter .cell:nth-child(31) { animation-delay: 900ms; }
+.strip--enter .cell:nth-child(32) { animation-delay: 930ms; }
+.strip--enter .cell:nth-child(33) { animation-delay: 960ms; }
+.strip--enter .cell:nth-child(34) { animation-delay: 990ms; }
+.strip--enter .cell:nth-child(35) { animation-delay: 1020ms; }
+.strip--enter .cell:nth-child(36) { animation-delay: 1050ms; }
+.strip--enter .cell:nth-child(37) { animation-delay: 1080ms; }
+.strip--enter .cell:nth-child(38) { animation-delay: 1110ms; }
+.strip--enter .cell:nth-child(39) { animation-delay: 1140ms; }
+.strip--enter .cell:nth-child(40) { animation-delay: 1170ms; }
+.strip--enter .cell:nth-child(n + 41) { animation-delay: 1170ms; }

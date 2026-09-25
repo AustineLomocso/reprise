@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 31,
+  "title": "<img src=x onerror=alert(1)>",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/31",
+  "provider": "claude",
+  "state": "NEEDS_INFO",
+  "created_at": "2026-09-25T03:00:00Z",
+  "updated_at": "2026-09-25T03:01:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "NEEDS_INFO",
+    "started_at": "2026-09-25T03:00:10Z",
+    "finished_at": "2026-09-25T03:01:00Z",
+    "duration_ms": 50000,
+    "fingerprint": {
+      "component": "unknown",
+      "functions": [],
+      "symptom": "<script>alert(2)</script>",
+      "trigger": "<img src=x onerror=alert(1)>",
+      "expected": "",
+      "actual": "",
+      "error_signature": ""
+    },
+    "duplicate": null,
+    "question": "What does \"<img src=x onerror=alert(1)>\" mean in <b>your</b> report?",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": null,
+    "bisect": null,
+    "root_cause": null
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_65273932abc6d7ad8a44",
+        "session_costs": 0,
+        "duration_ms": 11000,
+        "total_tokens": 4110,
+        "input_tokens": 3900,
+        "output_tokens": 210,
+        "tool_calls": 2
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-25T03:00:10Z",
+      "type": "triage.started",
+      "detail": "<a href=\"javascript:alert(3)\">click</a>"
+    },
+    {
+      "at": "2026-09-25T03:01:00Z",
+      "type": "triage.verdict",
+      "detail": "<img src=x onerror=alert(1)> could not be reproduced."
+    }
+  ],
+  "resolution_note": ""
+}

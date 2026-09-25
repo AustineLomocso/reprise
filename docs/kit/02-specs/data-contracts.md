@@ -109,6 +109,7 @@ Absent and null values (clarification approved by the owner, 25 Sep 2026; adds n
 - `triage.repro`, `triage.bisect`, `triage.root_cause` and `triage.duplicate` are `null` when that stage did not run (for example `BLOCKED_ENV`, a `NEEDS_INFO` decided at intake, or `DUPLICATE`, which has `duplicate` but no `repro`).
 - `fix` is absent until the first `/reprise fix` or linked PR.
 - In a `fix.iterations[]` entry, `pr`, `head_sha` and `verification` are `null` while the state is `FIXING`, and `pr` and `verification` stay `null` for an iteration that ended in `FIX_ABANDONED`.
+- Added in the web-only slice, pending owner review (same "did not run" rule): `triage.fingerprint` is `null` when intake did not finish; `verification.repro.evidence` is `null` unless every run passed; `duplicate.behaviour_check` is `null` or the `TrialOutcome` of running the candidate's repro test once on the current code.
 - Why a triage ended in `BLOCKED_ENV` or `ERROR` is read from the `detail` of the last `triage.verdict` or `error` event.
 
 Rules: `events` is append-only. Strings coming from Bob or from issue text are stored after redaction (`security.md`). Arrays have documented caps: `events` 200, `bob_tasks` 100, `blocking` 50, `notable` 50.

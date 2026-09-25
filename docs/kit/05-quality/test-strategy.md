@@ -44,7 +44,7 @@ Each is a hand-written issue event plus a replay fixture, run once with a Bob fi
 | S4 | Non-collaborator opens an issue | No Bob call, no comment |
 | S5 | Fix fixture modifies the repro test | Change reverted, reported to Bob; if still modified at verify time, `FIX_INCOMPLETE` with the stated reason |
 | S6 | Fix fixture deletes an existing test | Verification `REGRESSION_DETECTED` with class `REMOVED` |
-| S7 | Issue title with `<img src=x onerror=alert(1)>` | Dashboard shows the text literally; no script runs; no CSP violation |
+| S7 | Issue title with `<img src=x onerror=alert(1)>` | Dashboard shows the text literally; no script runs; no CSP violation. Checked in two layers, because no DOM dependency is allowed: CI asserts that the dashboard sources use no HTML-parsing DOM API, inline handler, inline script or inline style, and that the S7 record in `test/fixtures/security/` reaches the site unchanged; a browser check (Playwright against `node scripts/preview.mjs --data test/fixtures/security --data-source live --port 4174`) confirms literal text, no created elements, no dialog and no CSP violation, recorded in `ui-review.md` |
 
 ## Failure cases (phase 8)
 

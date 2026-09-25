@@ -1,4 +1,7 @@
 node_modules/
 .preview/
 .build/
+.review/
+.playwright-mcp/
+_site/
 *.log

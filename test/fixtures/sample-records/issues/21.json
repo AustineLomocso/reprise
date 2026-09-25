@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "repo": "AustineLomocso/reprise-demo-shop",
+  "issue": 21,
+  "title": "Line total uses 999 units when the quantity is higher",
+  "url": "https://github.com/AustineLomocso/reprise-demo-shop/issues/21",
+  "provider": "claude",
+  "state": "VERIFYING",
+  "created_at": "2026-09-25T01:00:00Z",
+  "updated_at": "2026-09-25T02:32:00Z",
+  "triage_runs": 1,
+  "auto_retriage_count": 0,
+  "triage": {
+    "verdict": "CONFIRMED",
+    "started_at": "2026-09-25T01:00:10Z",
+    "finished_at": "2026-09-25T01:06:15Z",
+    "duration_ms": 365000,
+    "fingerprint": {
+      "component": "pricing",
+      "functions": [
+        "lineTotal"
+      ],
+      "symptom": "line total wrong for quantities of 1000 or more",
+      "trigger": "one line with 1200 units",
+      "expected": "unit price times 1200",
+      "actual": "unit price times 999",
+      "error_signature": ""
+    },
+    "duplicate": {
+      "of": null,
+      "score": null,
+      "fields": {},
+      "reason": "",
+      "behaviour_check": null
+    },
+    "question": "",
+    "baseline_suite": {
+      "sha": "877a0e6218bea4d44451193d5436dcb18faa61cb",
+      "passed": 12,
+      "failed": 0
+    },
+    "repro": {
+      "test_file": "test/reprise/issue-21.test.js",
+      "test_sha256": "7c7212cffd5b459fefc4ecf97212a2f38418ba72db3bc25853333ed130b2f84d",
+      "branch": "reprise/repro-21",
+      "signature": {
+        "kind": "assertion_message",
+        "pattern": "24975000 !== 30000000"
+      },
+      "attempts": 1,
+      "scope_violations": [],
+      "trials": 20,
+      "failed": 20,
+      "invalid": 0,
+      "sequence": "FFFFFFFFFFFFFFFFFFFF",
+      "rate": 1,
+      "wilson_low": 0.8388748419471806,
+      "wilson_high": 1
+    },
+    "bisect": {
+      "status": "found",
+      "good_sha": "6953d1a5456b05eddf48bb7aad0ffbb15fa2a940",
+      "first_bad_sha": "9ec398436c760950a8dba2c6328f05a9f4c9f918",
+      "subject": "feat: cap quantity input at three digits",
+      "author": "demo-shop maintainer",
+      "date": "2026-09-23T12:00:00Z",
+      "url": "https://github.com/AustineLomocso/reprise-demo-shop/commit/9ec398436c760950a8dba2c6328f05a9f4c9f918",
+      "reason": ""
+    },
+    "root_cause": {
+      "summary": "lineTotal clamps the quantity to 999 with Math.min before multiplying.",
+      "locations": [
+        {
+          "file": "src/pricing.js",
+          "start_line": 5,
+          "end_line": 7,
+          "reason": "the quantity is clamped silently"
+        }
+      ],
+      "fix_direction": "Reject quantities above the limit instead of clamping them, or remove the clamp.",
+      "confidence": "high",
+      "ide_prompt": "Fix GitHub issue #21 in this repository.\nReproduction test: test/reprise/issue-21.test.js (get it with: git checkout origin/reprise/repro-21 -- test/reprise/issue-21.test.js).\nRun it with: node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/reprise/issue-21.test.js. It currently fails with: Expected values to be strictly equal: 24975000 !== 30000000\nLikely cause: lineTotal clamps the quantity to 999 with Math.min before multiplying.\nLocations: src/pricing.js lines 5–7\nIntroduced in 9ec3984 (feat: cap quantity input at three digits).\nRules: do not modify test/reprise/issue-21.test.js; keep the change minimal; run the full suite with node --test --test-reporter=junit --test-reporter-destination=/out/junit.xml test/ before finishing; open a PR whose description contains \"Fixes #21\"."
+    }
+  },
+  "fix": {
+    "iterations": [
+      {
+        "n": 1,
+        "source": "human",
+        "pr": 26,
+        "branch": "remove-qty-clamp",
+        "base_sha": "34616f3a8cb00a3d870efa25f7a8fcef78ac97b5",
+        "head_sha": "6770868aab7ce3f5678a895f353413f3866e3a5f",
+        "bob_iterations": 0,
+        "scope_violations": [],
+        "summary": "Remove the 999-unit clamp from lineTotal.",
+        "verification": null
+      }
+    ]
+  },
+  "cost": {
+    "bobcoins_total": 0,
+    "by_stage": {
+      "intake": 0,
+      "dedupe": 0,
+      "repro": 0,
+      "rootcause": 0,
+      "fix": 0
+    },
+    "bob_tasks": [
+      {
+        "stage": "intake",
+        "task_id": "msg_sample_6ba3769708d466f9b152",
+        "session_costs": 0,
+        "duration_ms": 19000,
+        "total_tokens": 6200,
+        "input_tokens": 5800,
+        "output_tokens": 400,
+        "tool_calls": 4
+      },
+      {
+        "stage": "repro",
+        "task_id": "msg_sample_a283915d4322af01947f",
+        "session_costs": 0,
+        "duration_ms": 90000,
+        "total_tokens": 19600,
+        "input_tokens": 18000,
+        "output_tokens": 1600,
+        "tool_calls": 9
+      },
+      {
+        "stage": "rootcause",
+        "task_id": "msg_sample_d38db8319ade452b0abf",
+        "session_costs": 0,
+        "duration_ms": 40000,
+        "total_tokens": 13700,
+        "input_tokens": 13000,
+        "output_tokens": 700,
+        "tool_calls": 6
+      }
+    ]
+  },
+  "events": [
+    {
+      "at": "2026-09-25T01:00:10Z",
+      "type": "triage.started",
+      "detail": "Maintainer added the reprise label."
+    },
+    {
+      "at": "2026-09-25T01:06:15Z",
+      "type": "triage.verdict",
+      "detail": "Reproduced in 20 of 20 runs."
+    },
+    {
+      "at": "2026-09-25T02:32:00Z",
+      "type": "verify.started",
+      "detail": "Pull request #26."
+    }
+  ],
+  "resolution_note": ""
+}
