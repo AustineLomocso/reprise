@@ -38,7 +38,7 @@ Reprise assists in three ways once a bug is `CONFIRMED` or `FLAKY`:
 - Every iteration empty (Bob produced no usable change) → state `FIX_ABANDONED`, label `reprise:fix-incomplete`, comment with Bob's last explanation. No PR.
 - Otherwise commit the last candidate (commit message `Fix #<N>: <summary>`), push, and open a **draft** PR titled `Fix #<N>: <summary>` whose body contains: summary, root cause, files changed, risk notes, tests added, "Fixes #<N>", iteration count, cost used (tokens under the Claude provider, Bobcoins under Bob; ADR-12), and a note that verification follows. Add label `reprise:fix-proposed` to the issue.
 - Run Part B inline in the same job (so the result does not depend on whether `GITHUB_TOKEN`-created PRs trigger workflows, gate G-12).
-- Git identity for commits: the `github-actions[bot]` identity as documented by GitHub (confirm the exact email in phase 4, gate G-17).
+- Git identity for commits: name `github-actions[bot]`, email `41898282+github-actions[bot]@users.noreply.github.com` (gate G-17, F-28).
 
 Merging is always left to a human. Reprise never marks a PR ready for review; the maintainer does.
 

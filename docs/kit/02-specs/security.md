@@ -39,7 +39,7 @@ Any occurrence of the closing tag inside the content is replaced with `</untrust
 
 GitHub masks secret values in logs; the engine additionally never logs prompts that contain secrets and logs Bob's stdout and Claude's responses only after redaction.
 
-Redaction list (exact values, read from the engine's environment when present): `GITHUB_TOKEN`, `BOB_API_KEY`, `BOB_TEAM_ID`, `ANTHROPIC_API_KEY`. Patterns: `ghp_`, `ghs_`, `github_pat_`, `sk-ant-`.
+Redaction list (exact values, read from the engine's environment when present): `GITHUB_TOKEN`, `BOB_API_KEY`, `BOB_TEAM_ID`, `ANTHROPIC_API_KEY`. Patterns: `ghp_`, `ghs_`, `github_pat_`, `sk-ant-` (Anthropic keys are `sk-ant-api...`, F-20).
 
 ## Record of gate results affecting security
 

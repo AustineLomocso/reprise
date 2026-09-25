@@ -94,6 +94,8 @@ Selected by `provider: claude`. Implemented in `src/provider/claude.ts` with the
 ### Client and secret
 
 - The official Anthropic TypeScript SDK, Messages API, client-side tool use. No other Anthropic surface (no server tools, no code execution tool, no Files API, no batches).
+- The key must be scoped to a single Claude Console workspace, so no `anthropic-workspace-id` header is needed (F-19). The SDK log level stays at its default `warn`; `debug` would log request and response bodies (F-21).
+- The SDK's automatic retries (F-21) are left at the default; the stage timeout of 10 minutes per request matches Bob's process timeout.
 - The API key comes from `ANTHROPIC_API_KEY` in the engine process environment only. It is never passed to the sandbox, to a `bob` child, to git, or into any prompt; it is on the redaction list (`security.md`).
 
 ### Configuration (`.reprise.yml`)
@@ -130,7 +132,7 @@ There is no tool that executes commands, in any stage, ever (ADR-4). The engine 
 ### Stage call
 
 1. Build the prompt exactly as in "Prompt assembly" (same prompt file, variables, untrusted block, appended schema and "Reply with one JSON object and nothing else.").
-2. Send it as the first user message with the stage's tools and `max_tokens`. While the response stops for tool use and the turn budget remains: run every tool call in the response and return all tool results in one user message.
+2. Send it as the first user message with the stage's tools and `max_tokens`, `tool_choice` left at its default (`auto`; F-22). Each assistant response is appended to the history with its full `content` unchanged; tool results go back as one user message whose content is only `tool_result` blocks, in the order of the `tool_use` blocks, with `is_error: true` for refusals and tool errors (F-23). While the response stops for tool use and the turn budget remains: run every tool call in the response and return all tool results in one user message.
 3. When the response ends normally, take its text and continue with "Parsing the result" step 3 (JSON extraction), 4 (validation), 5 (stats) and 6 (redaction). The schema-repair retry is one more user message in the same conversation with the same repair text.
 4. Stage errors (state `ERROR`, stage named): turn budget exhausted ("tool-turn cap reached in stage X"), output limit reached on a response ("output token limit reached in stage X"), refusal or API error (the SDK's error class and HTTP status, redacted), invalid JSON after the one repair.
 5. Revision loops (`revise-repro-test`, `revise-fix`) continue the same message history instead of `--resume`. G-14 does not apply to this provider.
